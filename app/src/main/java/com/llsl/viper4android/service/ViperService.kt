@@ -53,13 +53,6 @@ class ViperService : LifecycleService() {
             }
             context.startForegroundService(intent)
         }
-
-        fun stopService(context: Context) {
-            val intent = Intent(context, ViperService::class.java).apply {
-                action = ACTION_STOP
-            }
-            context.startService(intent)
-        }
     }
 
     inner class LocalBinder : Binder() {
@@ -123,7 +116,7 @@ class ViperService : LifecycleService() {
     private fun reapplyAllEffects() {
         lifecycleScope.launch {
             globalEffect?.let { applyFullStateToEffect(it, skipShmWrite = true) }
-            for (i in 0 until sessions.size()) {
+            for (i in 0 until sessions.size) {
                 applyFullStateToEffect(sessions.valueAt(i), skipShmWrite = true)
             }
         }
@@ -131,7 +124,7 @@ class ViperService : LifecycleService() {
 
     private suspend fun applyFullStateToEffect(effect: ViperEffect, skipShmWrite: Boolean = false) {
         val state = EffectDispatcher.loadFullStateFromPrefs(repository)
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         val headphoneConnected = AudioOutputDetector.isHeadphoneConnected(audioManager)
         val fxType =
             if (headphoneConnected) ViperParams.FX_TYPE_HEADPHONE else ViperParams.FX_TYPE_SPEAKER
@@ -1228,9 +1221,6 @@ class ViperService : LifecycleService() {
         useAidlTypeUuid = aidlType
         initGlobalEffect()
     }
-
-    val activeSessionCount: Int
-        get() = sessions.size
 
     private fun createNotificationChannel() {
         val channelId = getString(R.string.notification_channel_id)

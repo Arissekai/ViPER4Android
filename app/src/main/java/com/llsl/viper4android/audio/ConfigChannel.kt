@@ -231,7 +231,7 @@ object ConfigChannel {
                 buf.putInt(-byteCount)
                 buf.put(data)
                 val padding = paddedInts * 4 - byteCount
-                for (i in 0 until padding) buf.put(0)
+                repeat(padding) { buf.put(0) }
                 for (entry in extras) {
                     buf.putInt(entry.paramId)
                     buf.putInt(entry.values.size)
@@ -285,7 +285,7 @@ object ConfigChannel {
                 buf.putInt(-byteCount)
                 buf.put(ba.data)
                 val padding = paddedInts * 4 - byteCount
-                for (i in 0 until padding) buf.put(0)
+                repeat(padding) { buf.put(0) }
             }
 
             val prevSeq = buf.getInt(8)
@@ -461,7 +461,7 @@ object ConfigChannel {
         buf.putInt(-byteCount)
         buf.put(data)
         val padding = paddedInts * 4 - byteCount
-        for (i in 0 until padding) buf.put(0)
+        repeat(padding) { buf.put(0) }
         writeViaSu(buf.array())
     }
 }

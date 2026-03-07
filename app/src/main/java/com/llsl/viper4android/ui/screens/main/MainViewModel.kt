@@ -237,10 +237,8 @@ class MainViewModel @Inject constructor(
         val VSE_BARK_VALUES get() = EffectDispatcher.VSE_BARK_VALUES
         val DIFF_SURROUND_DELAY_VALUES get() = EffectDispatcher.DIFF_SURROUND_DELAY_VALUES
         val FIELD_SURROUND_WIDENING_VALUES get() = EffectDispatcher.FIELD_SURROUND_WIDENING_VALUES
-        val EQ_PRESETS get() = EffectDispatcher.EQ_PRESETS
         val DYNAMIC_SYSTEM_DEVICES get() = EffectDispatcher.DYNAMIC_SYSTEM_DEVICES
         val DYNAMIC_SYSTEM_DEVICE_NAMES get() = EffectDispatcher.DYNAMIC_SYSTEM_DEVICE_NAMES
-        val EQ_BAND_LABELS get() = EffectDispatcher.EQ_BAND_LABELS
         val BASS_GAIN_DB_LABELS get() = EffectDispatcher.BASS_GAIN_DB_LABELS
         val CLARITY_GAIN_DB_LABELS get() = EffectDispatcher.CLARITY_GAIN_DB_LABELS
 
@@ -1349,7 +1347,7 @@ class MainViewModel @Inject constructor(
             repository.setStringPreference("${ViperParams.PARAM_HP_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("eq_bands_$bandCount", bands)
         }
-        hpDispatchEqBands(ViperParams.PARAM_HP_EQ_BAND_LEVEL, bands)
+        hpDispatchEqBands(bands)
     }
 
     fun setEqBands(bands: String) {
@@ -1362,7 +1360,7 @@ class MainViewModel @Inject constructor(
             repository.setStringPreference("${ViperParams.PARAM_HP_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("eq_bands_$bandCount", bands)
         }
-        hpDispatchEqBands(ViperParams.PARAM_HP_EQ_BAND_LEVEL, bands)
+        hpDispatchEqBands(bands)
     }
 
     fun setEqBandCount(count: Int) {
@@ -1841,7 +1839,7 @@ class MainViewModel @Inject constructor(
             repository.setStringPreference("${ViperParams.PARAM_SPK_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("spk_eq_bands_$bandCount", bands)
         }
-        spkDispatchEqBands(ViperParams.PARAM_SPK_EQ_BAND_LEVEL, bands)
+        spkDispatchEqBands(bands)
     }
 
     fun setSpkEqBands(bands: String) {
@@ -1854,7 +1852,7 @@ class MainViewModel @Inject constructor(
             repository.setStringPreference("${ViperParams.PARAM_SPK_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("spk_eq_bands_$bandCount", bands)
         }
-        spkDispatchEqBands(ViperParams.PARAM_SPK_EQ_BAND_LEVEL, bands)
+        spkDispatchEqBands(bands)
     }
 
     fun setSpkEqBandCount(count: Int) {
@@ -2517,7 +2515,6 @@ class MainViewModel @Inject constructor(
 
     fun importPresetFile(uri: Uri): Boolean {
         return try {
-            val context = getApplication<Application>()
             val destDir = getFilesDir("Preset")
             val destFile = copyUriToFile(uri, destDir, "preset.json") ?: return false
             val json = destFile.readText()
@@ -3740,138 +3737,6 @@ class MainViewModel @Inject constructor(
         viperService?.recreateGlobalEffect(enabled)
     }
 
-    private fun serializeState(state: MainUiState): String {
-        val obj = JSONObject()
-        obj.put("masterEnabled", state.masterEnabled)
-        obj.put("outputVolume", state.outputVolume)
-        obj.put("channelPan", state.channelPan)
-        obj.put("limiter", state.limiter)
-        obj.put("agcEnabled", state.agcEnabled)
-        obj.put("agcStrength", state.agcStrength)
-        obj.put("agcMaxGain", state.agcMaxGain)
-        obj.put("agcOutputThreshold", state.agcOutputThreshold)
-        obj.put("fetEnabled", state.fetEnabled)
-        obj.put("fetThreshold", state.fetThreshold)
-        obj.put("fetRatio", state.fetRatio)
-        obj.put("fetAutoKnee", state.fetAutoKnee)
-        obj.put("fetKnee", state.fetKnee)
-        obj.put("fetKneeMulti", state.fetKneeMulti)
-        obj.put("fetAutoGain", state.fetAutoGain)
-        obj.put("fetGain", state.fetGain)
-        obj.put("fetAutoAttack", state.fetAutoAttack)
-        obj.put("fetAttack", state.fetAttack)
-        obj.put("fetMaxAttack", state.fetMaxAttack)
-        obj.put("fetAutoRelease", state.fetAutoRelease)
-        obj.put("fetRelease", state.fetRelease)
-        obj.put("fetMaxRelease", state.fetMaxRelease)
-        obj.put("fetCrest", state.fetCrest)
-        obj.put("fetAdapt", state.fetAdapt)
-        obj.put("fetNoClip", state.fetNoClip)
-        obj.put("ddcEnabled", state.ddcEnabled)
-        obj.put("vseEnabled", state.vseEnabled)
-        obj.put("vseStrength", state.vseStrength)
-        obj.put("vseExciter", state.vseExciter)
-        obj.put("eqEnabled", state.eqEnabled)
-        obj.put("eqBandCount", state.eqBandCount)
-        obj.put("eqBands", state.eqBands)
-        obj.put("convolverEnabled", state.convolverEnabled)
-        obj.put("convolverCrossChannel", state.convolverCrossChannel)
-        obj.put("fieldSurroundEnabled", state.fieldSurroundEnabled)
-        obj.put("fieldSurroundWidening", state.fieldSurroundWidening)
-        obj.put("fieldSurroundMidImage", state.fieldSurroundMidImage)
-        obj.put("fieldSurroundDepth", state.fieldSurroundDepth)
-        obj.put("diffSurroundEnabled", state.diffSurroundEnabled)
-        obj.put("diffSurroundDelay", state.diffSurroundDelay)
-        obj.put("vheEnabled", state.vheEnabled)
-        obj.put("vheQuality", state.vheQuality)
-        obj.put("reverbEnabled", state.reverbEnabled)
-        obj.put("reverbRoomSize", state.reverbRoomSize)
-        obj.put("reverbWidth", state.reverbWidth)
-        obj.put("reverbDampening", state.reverbDampening)
-        obj.put("reverbWet", state.reverbWet)
-        obj.put("reverbDry", state.reverbDry)
-        obj.put("dynamicSystemEnabled", state.dynamicSystemEnabled)
-        obj.put("dynamicSystemDevice", state.dynamicSystemDevice)
-        obj.put("dynamicSystemStrength", state.dynamicSystemStrength)
-        obj.put("tubeSimulatorEnabled", state.tubeSimulatorEnabled)
-        obj.put("bassEnabled", state.bassEnabled)
-        obj.put("bassMode", state.bassMode)
-        obj.put("bassFrequency", state.bassFrequency)
-        obj.put("bassGain", state.bassGain)
-        obj.put("clarityEnabled", state.clarityEnabled)
-        obj.put("clarityMode", state.clarityMode)
-        obj.put("clarityGain", state.clarityGain)
-        obj.put("cureEnabled", state.cureEnabled)
-        obj.put("cureStrength", state.cureStrength)
-        obj.put("analogxEnabled", state.analogxEnabled)
-        obj.put("analogxMode", state.analogxMode)
-        obj.put("spkMasterEnabled", state.spkMasterEnabled)
-        obj.put("speakerOptEnabled", state.speakerOptEnabled)
-        obj.put("spkConvolverEnabled", state.spkConvolverEnabled)
-        obj.put("spkConvolverCrossChannel", state.spkConvolverCrossChannel)
-        obj.put("spkEqEnabled", state.spkEqEnabled)
-        obj.put("spkEqBandCount", state.spkEqBandCount)
-        obj.put("spkEqBands", state.spkEqBands)
-        obj.put("spkReverbEnabled", state.spkReverbEnabled)
-        obj.put("spkReverbRoomSize", state.spkReverbRoomSize)
-        obj.put("spkReverbWidth", state.spkReverbWidth)
-        obj.put("spkReverbDampening", state.spkReverbDampening)
-        obj.put("spkReverbWet", state.spkReverbWet)
-        obj.put("spkReverbDry", state.spkReverbDry)
-        obj.put("spkAgcEnabled", state.spkAgcEnabled)
-        obj.put("spkAgcStrength", state.spkAgcStrength)
-        obj.put("spkAgcMaxGain", state.spkAgcMaxGain)
-        obj.put("spkAgcOutputThreshold", state.spkAgcOutputThreshold)
-        obj.put("spkFetEnabled", state.spkFetEnabled)
-        obj.put("spkFetThreshold", state.spkFetThreshold)
-        obj.put("spkFetRatio", state.spkFetRatio)
-        obj.put("spkFetAutoKnee", state.spkFetAutoKnee)
-        obj.put("spkFetKnee", state.spkFetKnee)
-        obj.put("spkFetKneeMulti", state.spkFetKneeMulti)
-        obj.put("spkFetAutoGain", state.spkFetAutoGain)
-        obj.put("spkFetGain", state.spkFetGain)
-        obj.put("spkFetAutoAttack", state.spkFetAutoAttack)
-        obj.put("spkFetAttack", state.spkFetAttack)
-        obj.put("spkFetMaxAttack", state.spkFetMaxAttack)
-        obj.put("spkFetAutoRelease", state.spkFetAutoRelease)
-        obj.put("spkFetRelease", state.spkFetRelease)
-        obj.put("spkFetMaxRelease", state.spkFetMaxRelease)
-        obj.put("spkFetCrest", state.spkFetCrest)
-        obj.put("spkFetAdapt", state.spkFetAdapt)
-        obj.put("spkFetNoClip", state.spkFetNoClip)
-        obj.put("spkOutputVolume", state.spkOutputVolume)
-        obj.put("spkLimiter", state.spkLimiter)
-        obj.put("spkDdcEnabled", state.spkDdcEnabled)
-        obj.put("spkVseEnabled", state.spkVseEnabled)
-        obj.put("spkVseStrength", state.spkVseStrength)
-        obj.put("spkVseExciter", state.spkVseExciter)
-        obj.put("spkFieldSurroundEnabled", state.spkFieldSurroundEnabled)
-        obj.put("spkFieldSurroundWidening", state.spkFieldSurroundWidening)
-        obj.put("spkFieldSurroundMidImage", state.spkFieldSurroundMidImage)
-        obj.put("spkFieldSurroundDepth", state.spkFieldSurroundDepth)
-        obj.put("spkDiffSurroundEnabled", state.spkDiffSurroundEnabled)
-        obj.put("spkDiffSurroundDelay", state.spkDiffSurroundDelay)
-        obj.put("spkVheEnabled", state.spkVheEnabled)
-        obj.put("spkVheQuality", state.spkVheQuality)
-        obj.put("spkDynamicSystemEnabled", state.spkDynamicSystemEnabled)
-        obj.put("spkDynamicSystemDevice", state.spkDynamicSystemDevice)
-        obj.put("spkDynamicSystemStrength", state.spkDynamicSystemStrength)
-        obj.put("spkTubeSimulatorEnabled", state.spkTubeSimulatorEnabled)
-        obj.put("spkBassEnabled", state.spkBassEnabled)
-        obj.put("spkBassMode", state.spkBassMode)
-        obj.put("spkBassFrequency", state.spkBassFrequency)
-        obj.put("spkBassGain", state.spkBassGain)
-        obj.put("spkClarityEnabled", state.spkClarityEnabled)
-        obj.put("spkClarityMode", state.spkClarityMode)
-        obj.put("spkClarityGain", state.spkClarityGain)
-        obj.put("spkCureEnabled", state.spkCureEnabled)
-        obj.put("spkCureStrength", state.spkCureStrength)
-        obj.put("spkAnalogxEnabled", state.spkAnalogxEnabled)
-        obj.put("spkAnalogxMode", state.spkAnalogxMode)
-        obj.put("spkChannelPan", state.spkChannelPan)
-        return obj.toString()
-    }
-
     private fun serializeStateForMode(state: MainUiState, fxType: Int): String {
         val obj = JSONObject()
         if (fxType == ViperParams.FX_TYPE_HEADPHONE) {
@@ -4478,11 +4343,17 @@ class MainViewModel @Inject constructor(
         viperService?.dispatchEqBands(param, bandsString)
     }
 
-    private fun hpDispatchEqBands(param: Int, bandsString: String) {
-        if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) dispatchEqBands(param, bandsString)
+    private fun hpDispatchEqBands(bandsString: String) {
+        if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) dispatchEqBands(
+            ViperParams.PARAM_HP_EQ_BAND_LEVEL,
+            bandsString
+        )
     }
 
-    private fun spkDispatchEqBands(param: Int, bandsString: String) {
-        if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) dispatchEqBands(param, bandsString)
+    private fun spkDispatchEqBands(bandsString: String) {
+        if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) dispatchEqBands(
+            ViperParams.PARAM_SPK_EQ_BAND_LEVEL,
+            bandsString
+        )
     }
 }
