@@ -18,6 +18,7 @@ import com.llsl.viper4android.R
 import com.llsl.viper4android.audio.AudioOutputDetector
 import com.llsl.viper4android.audio.EffectDispatcher
 import com.llsl.viper4android.audio.FileLogger
+import com.llsl.viper4android.audio.ParamEntry
 import com.llsl.viper4android.audio.ViperEffect
 import com.llsl.viper4android.audio.ViperParams
 import com.llsl.viper4android.data.repository.ViperRepository
@@ -232,6 +233,49 @@ class ViperService : LifecycleService() {
         globalEffect?.setParameter(param, value)
         for (i in 0 until sessions.size) {
             sessions.valueAt(i).setParameter(param, value)
+        }
+    }
+
+    fun dispatchParamsBatch(entries: List<ParamEntry>) {
+        if (entries.isEmpty()) return
+        FileLogger.d("Service", "DSP batch: ${entries.size} params")
+        if (useAidlTypeUuid) {
+            // TODO: AIDL Implementation.
+        }
+        for (entry in entries) {
+            when (entry.values.size) {
+                1 -> {
+                    globalEffect?.setParameter(entry.paramId, entry.values[0])
+                    for (i in 0 until sessions.size) {
+                        sessions.valueAt(i).setParameter(entry.paramId, entry.values[0])
+                    }
+                }
+
+                2 -> {
+                    globalEffect?.setParameter(entry.paramId, entry.values[0], entry.values[1])
+                    for (i in 0 until sessions.size) {
+                        sessions.valueAt(i)
+                            .setParameter(entry.paramId, entry.values[0], entry.values[1])
+                    }
+                }
+
+                3 -> {
+                    globalEffect?.setParameter(
+                        entry.paramId,
+                        entry.values[0],
+                        entry.values[1],
+                        entry.values[2]
+                    )
+                    for (i in 0 until sessions.size) {
+                        sessions.valueAt(i).setParameter(
+                            entry.paramId,
+                            entry.values[0],
+                            entry.values[1],
+                            entry.values[2]
+                        )
+                    }
+                }
+            }
         }
     }
 
