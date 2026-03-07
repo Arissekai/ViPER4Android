@@ -10,6 +10,8 @@ import android.os.IBinder
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.llsl.viper4android.audio.AudioOutputDetector
+import com.llsl.viper4android.audio.ByteArrayParam
+import com.llsl.viper4android.audio.ConfigChannel
 import com.llsl.viper4android.audio.EffectDispatcher
 import com.llsl.viper4android.audio.FileLogger
 import com.llsl.viper4android.audio.ParamEntry
@@ -313,6 +315,7 @@ class MainViewModel @Inject constructor(
                             detectedType
                         )
                     }
+                    ConfigChannel.setActiveFxType(detectedType)
                     applyFullState()
                 }
             }
@@ -871,6 +874,7 @@ class MainViewModel @Inject constructor(
     private fun applyFullState() {
         val service = viperService ?: return
         val state = _uiState.value
+        ConfigChannel.setActiveFxType(activeDeviceType)
         val isMasterOn =
             if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) state.spkMasterEnabled else state.masterEnabled
         val mode = if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) "Headphone" else "Speaker"
@@ -879,11 +883,18 @@ class MainViewModel @Inject constructor(
             "Dispatch: applyFullState mode=$mode master=${if (isMasterOn) "ON" else "OFF"}"
         )
 
+        val byteArrayParams = mutableListOf<ByteArrayParam>()
+
         val ddcEnabled =
             if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) state.spkDdcEnabled else state.ddcEnabled
         val ddcDevice =
             if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) state.spkDdcDevice else state.ddcDevice
         FileLogger.i("ViewModel", "applyFullState: ddcEnabled=$ddcEnabled ddcDevice='$ddcDevice'")
+        if (ddcEnabled && ddcDevice.isNotEmpty()) {
+            val ba = prepareDdcByteArray(ddcDevice)
+            FileLogger.i("ViewModel", "applyFullState: DDC byteArray=${ba?.data?.size ?: "null"}")
+            ba?.let { byteArrayParams.add(it) }
+        }
 
         val convolverEnabled =
             if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) state.spkConvolverEnabled else state.convolverEnabled
@@ -893,11 +904,100 @@ class MainViewModel @Inject constructor(
             "ViewModel",
             "applyFullState: convolverEnabled=$convolverEnabled kernel='$kernel'"
         )
+        if (convolverEnabled && kernel.isNotEmpty()) {
+            val ba = prepareConvolverByteArray(kernel)
+            FileLogger.i(
+                "ViewModel",
+                "applyFullState: convolver byteArray=${ba?.data?.size ?: "null"}"
+            )
+            ba?.let { byteArrayParams.add(it) }
+        }
 
         service.dispatchFullState(
             state.copy(fxType = activeDeviceType),
-            isMasterOn
+            isMasterOn,
+            byteArrayParams.ifEmpty { null }
         )
+    }
+
+    private fun prepareDdcByteArray(name: String): ByteArrayParam? {
+        return try {
+            val file = File(getFilesDir("DDC"), "$name.vdc")
+            FileLogger.i(
+                "ViewModel",
+                "prepareDdc: file=${file.absolutePath} exists=${file.exists()}"
+            )
+            if (!file.exists()) return null
+            val lines = file.readLines()
+            var coeffs44100: FloatArray? = null
+            var coeffs48000: FloatArray? = null
+            for (line in lines) {
+                val trimmed = line.trim()
+                when {
+                    trimmed.startsWith("SR_44100:") -> {
+                        coeffs44100 = trimmed.removePrefix("SR_44100:")
+                            .split(",").map { it.trim().toFloat() }.toFloatArray()
+                    }
+
+                    trimmed.startsWith("SR_48000:") -> {
+                        coeffs48000 = trimmed.removePrefix("SR_48000:")
+                            .split(",").map { it.trim().toFloat() }.toFloatArray()
+                    }
+                }
+            }
+            if (coeffs44100 == null || coeffs48000 == null) return null
+            if (coeffs44100.size != coeffs48000.size) return null
+            if (coeffs44100.size % 5 != 0) return null
+            val arrSize = coeffs44100.size
+            val naturalSize = 4 + arrSize * 4 * 2
+            val wireSize = when {
+                naturalSize <= 256 -> 256
+                naturalSize <= 1024 -> 1024
+                else -> return null
+            }
+            val buffer = ByteBuffer.allocate(wireSize).order(ByteOrder.LITTLE_ENDIAN)
+            buffer.putInt(arrSize)
+            for (f in coeffs44100) buffer.putFloat(f)
+            for (f in coeffs48000) buffer.putFloat(f)
+            ByteArrayParam(ViperParams.PARAM_HP_DDC_COEFFICIENTS, buffer.array())
+        } catch (e: Exception) {
+            FileLogger.e("ViewModel", "Failed to prepare DDC: $name", e)
+            null
+        }
+    }
+
+    private fun prepareConvolverByteArray(fileName: String): ByteArrayParam? {
+        if (!_aidlModeEnabled.value) return null
+        return try {
+            val file = File(getFilesDir("Kernel"), fileName)
+            FileLogger.i(
+                "ViewModel",
+                "prepareConvolver: file=${file.absolutePath} exists=${file.exists()}"
+            )
+            if (!file.exists()) return null
+            val safeName = fileName.replace("'", "")
+            val subDir = if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) "spk" else "hp"
+            val kernelPath = "/data/local/tmp/v4a/$subDir/$safeName"
+            val tmpPath = "$kernelPath.tmp"
+            val process = Runtime.getRuntime().exec(
+                arrayOf(
+                    "su", "-c",
+                    "mkdir -p /data/local/tmp/v4a/$subDir && cp '${file.absolutePath}' '$tmpPath' && mv '$tmpPath' '$kernelPath' && chmod 644 '$kernelPath'"
+                )
+            )
+            process.waitFor()
+            FileLogger.i("ViewModel", "Kernel copied to $kernelPath (for full state)")
+            val param = if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER)
+                ViperParams.PARAM_SPK_CONVOLVER_SET_KERNEL else ViperParams.PARAM_HP_CONVOLVER_SET_KERNEL
+            val pathBytes = kernelPath.toByteArray(Charsets.UTF_8)
+            val buffer = ByteBuffer.allocate(256).order(ByteOrder.LITTLE_ENDIAN)
+            buffer.putInt(pathBytes.size)
+            buffer.put(pathBytes)
+            ByteArrayParam(param, buffer.array())
+        } catch (e: Exception) {
+            FileLogger.e("ViewModel", "Failed to prepare kernel: $fileName", e)
+            null
+        }
     }
 
     fun setMasterEnabled(enabled: Boolean) {
@@ -933,6 +1033,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             repository.setIntPreference(ViperRepository.PREF_FX_TYPE, type)
         }
+        ConfigChannel.setActiveFxType(type)
         applyFullState()
     }
 
@@ -2553,7 +2654,9 @@ class MainViewModel @Inject constructor(
             for (f in coeffs48000) buffer.putFloat(f)
 
             val service = viperService ?: return false
-            service.dispatchParam(ViperParams.PARAM_HP_DDC_COEFFICIENTS, buffer.array())
+            val extras =
+                if (enableParam != null) listOf(ParamEntry(enableParam, intArrayOf(1))) else null
+            service.dispatchParam(ViperParams.PARAM_HP_DDC_COEFFICIENTS, buffer.array(), extras)
             true
         } catch (e: Exception) {
             FileLogger.e("ViewModel", "Failed to load VDC: $name", e)
@@ -2648,7 +2751,9 @@ class MainViewModel @Inject constructor(
             buffer.putInt(pathBytes.size)
             buffer.put(pathBytes)
             val service = viperService ?: return false
-            service.dispatchParam(param, buffer.array())
+            val extras =
+                if (enableParam != null) listOf(ParamEntry(enableParam, intArrayOf(1))) else null
+            service.dispatchParam(param, buffer.array(), extras)
             true
         } catch (e: Exception) {
             FileLogger.e("ViewModel", "Failed to load kernel via file: $fileName", e)
@@ -3559,7 +3664,7 @@ class MainViewModel @Inject constructor(
 
     fun queryDriverStatus() {
         if (_aidlModeEnabled.value) {
-            // TODO: AIDL driver status query.
+            queryDriverStatusFromFile()
             return
         }
         val effect = viperService?.getGlobalEffect()
@@ -3576,6 +3681,23 @@ class MainViewModel @Inject constructor(
         }
         queryDriverStatusFrom(probe)
         probe.release()
+    }
+
+    private fun queryDriverStatusFromFile() {
+        val status = ConfigChannel.readStatus()
+        if (status == null || status.versionCode <= 0) {
+            if (_driverStatus.value.installed) return
+            _driverStatus.value = DriverStatus(installed = false)
+            return
+        }
+        _driverStatus.value = DriverStatus(
+            installed = true,
+            versionCode = status.versionCode,
+            versionName = status.versionName,
+            architecture = status.architecture,
+            streaming = status.streaming,
+            samplingRate = status.sampleRate
+        )
     }
 
     private fun queryDriverStatusFrom(effect: ViperEffect) {
