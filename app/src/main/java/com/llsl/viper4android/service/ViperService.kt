@@ -115,9 +115,14 @@ class ViperService : LifecycleService() {
 
     private fun reapplyAllEffects() {
         lifecycleScope.launch {
-            globalEffect?.let { applyFullStateToEffect(it, skipShmWrite = true) }
+            var shmWritten = false
+            globalEffect?.let {
+                applyFullStateToEffect(it, skipShmWrite = false)
+                shmWritten = true
+            }
             for (i in 0 until sessions.size) {
-                applyFullStateToEffect(sessions.valueAt(i), skipShmWrite = true)
+                applyFullStateToEffect(sessions.valueAt(i), skipShmWrite = shmWritten)
+                shmWritten = true
             }
         }
     }
@@ -375,6 +380,7 @@ class ViperService : LifecycleService() {
             collectSpeakerParams(params, state)
         }
         val finalByteArrays = byteArrayParams ?: prepareByteArraysForState(state)
+        ConfigChannel.setActiveFxType(state.fxType)
         ConfigChannel.writeFullState(params, finalByteArrays, state.fxType)
     }
 
