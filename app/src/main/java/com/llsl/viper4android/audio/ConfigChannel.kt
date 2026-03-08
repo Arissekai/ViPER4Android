@@ -131,7 +131,10 @@ object ConfigChannel {
 
     private fun paramKey(entry: ParamEntry): Long {
         val id = entry.paramId.toLong()
-        if (entry.values.size >= 2 && (entry.paramId == 65552 || entry.paramId == 65596)) {
+        if (
+            entry.values.size >= 2
+            && (entry.paramId == ViperParams.PARAM_HP_EQ_BAND_LEVEL || entry.paramId == ViperParams.PARAM_SPK_EQ_BAND_LEVEL)
+        ) {
             return (id shl 32) or (entry.values[0].toLong() and 0xFFFFFFFFL)
         }
         return id shl 32

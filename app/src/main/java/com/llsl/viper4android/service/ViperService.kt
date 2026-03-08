@@ -319,18 +319,36 @@ class ViperService : LifecycleService() {
         }
     }
 
-    fun dispatchEqBands(param: Int, bandsString: String) {
+    fun dispatchEqBands(
+        param: Int,
+        bandsString: String,
+        bandCountParam: Int = 0,
+        bandCount: Int = 0
+    ) {
         if (useAidlTypeUuid) {
-            FileLogger.d("Service", "AIDL shm EQ param=0x${param.toString(16)} bands=$bandsString")
+            FileLogger.d(
+                "Service",
+                "AIDL shm EQ param=0x${param.toString(16)} bands=$bandsString bandCount=$bandCount"
+            )
             val bands = bandsString.split(";").filter { it.isNotBlank() }
-            val entries = bands.mapIndexed { index, bandStr ->
+            val entries = mutableListOf<ParamEntry>()
+            if (bandCountParam != 0) {
+                entries.add(ParamEntry(bandCountParam, intArrayOf(bandCount)))
+            }
+            bands.forEachIndexed { index, bandStr ->
                 val level = (bandStr.toFloatOrNull() ?: 0f) * 100
-                ParamEntry(param, intArrayOf(index, level.toInt()))
+                entries.add(ParamEntry(param, intArrayOf(index, level.toInt())))
             }
             ConfigChannel.writeParams(entries)
             return
         }
         FileLogger.d("Service", "DSP EQ param=0x${param.toString(16)} bands=$bandsString")
+        if (bandCountParam != 0) {
+            globalEffect?.setParameter(bandCountParam, bandCount)
+            for (i in 0 until sessions.size) {
+                sessions.valueAt(i).setParameter(bandCountParam, bandCount)
+            }
+        }
         globalEffect?.let { EffectDispatcher.dispatchEqBands(it, param, bandsString) }
         for (i in 0 until sessions.size) {
             EffectDispatcher.dispatchEqBands(sessions.valueAt(i), param, bandsString)

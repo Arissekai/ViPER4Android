@@ -1387,8 +1387,12 @@ class MainViewModel @Inject constructor(
             repository.setStringPreference("eq_bands_$count", bands)
         }
         if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) {
-            dispatchInt(ViperParams.PARAM_HP_EQ_BAND_COUNT, count)
-            dispatchEqBands(ViperParams.PARAM_HP_EQ_BAND_LEVEL, bands)
+            dispatchEqBands(
+                ViperParams.PARAM_HP_EQ_BAND_LEVEL,
+                bands,
+                ViperParams.PARAM_HP_EQ_BAND_COUNT,
+                count
+            )
         }
         loadEqPresetsForBandCount(count, isSpk = false)
     }
@@ -1879,8 +1883,12 @@ class MainViewModel @Inject constructor(
             repository.setStringPreference("spk_eq_bands_$count", bands)
         }
         if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) {
-            dispatchInt(ViperParams.PARAM_SPK_EQ_BAND_COUNT, count)
-            dispatchEqBands(ViperParams.PARAM_SPK_EQ_BAND_LEVEL, bands)
+            dispatchEqBands(
+                ViperParams.PARAM_SPK_EQ_BAND_LEVEL,
+                bands,
+                ViperParams.PARAM_SPK_EQ_BAND_COUNT,
+                count
+            )
         }
         loadEqPresetsForBandCount(count, isSpk = true)
     }
@@ -4339,8 +4347,13 @@ class MainViewModel @Inject constructor(
         if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) dispatchInt(param, value)
     }
 
-    private fun dispatchEqBands(param: Int, bandsString: String) {
-        viperService?.dispatchEqBands(param, bandsString)
+    private fun dispatchEqBands(
+        param: Int,
+        bandsString: String,
+        bandCountParam: Int = 0,
+        bandCount: Int = 0
+    ) {
+        viperService?.dispatchEqBands(param, bandsString, bandCountParam, bandCount)
     }
 
     private fun hpDispatchEqBands(bandsString: String) {
