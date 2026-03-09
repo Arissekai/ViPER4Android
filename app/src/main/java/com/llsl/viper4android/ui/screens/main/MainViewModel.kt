@@ -34,6 +34,7 @@ import org.json.JSONObject
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.Locale
 import java.util.zip.CRC32
 import javax.inject.Inject
 
@@ -418,7 +419,13 @@ class MainViewModel @Inject constructor(
         ).first()
         val parsedBandCount = rawEqBands.split(";").count { it.isNotBlank() }
         val eqBands = if (parsedBandCount != eqBandCount) {
-            List(eqBandCount) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+            List(eqBandCount) { 0f }.joinToString(";") {
+                String.format(
+                    Locale.US,
+                    "%.1f",
+                    it
+                )
+            } + ";"
         } else {
             rawEqBands
         }
@@ -426,7 +433,8 @@ class MainViewModel @Inject constructor(
             .let { if (it < 0) null else it.toLong() }
         val eqBandsMap = mutableMapOf<Int, String>()
         for (bc in listOf(10, 15, 25, 31)) {
-            val defaultBands = List(bc) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+            val defaultBands =
+                List(bc) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
             eqBandsMap[bc] = repository.getStringPreference("eq_bands_$bc", defaultBands).first()
         }
         eqBandsMap[eqBandCount] = eqBands
@@ -706,13 +714,20 @@ class MainViewModel @Inject constructor(
         ).first()
         val parsedSpkBandCount = rawSpkEqBands.split(";").count { it.isNotBlank() }
         val spkEqBands = if (parsedSpkBandCount != spkEqBandCount) {
-            List(spkEqBandCount) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+            List(spkEqBandCount) { 0f }.joinToString(";") {
+                String.format(
+                    Locale.US,
+                    "%.1f",
+                    it
+                )
+            } + ";"
         } else {
             rawSpkEqBands
         }
         val spkEqBandsMap = mutableMapOf<Int, String>()
         for (bc in listOf(10, 15, 25, 31)) {
-            val defaultBands = List(bc) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+            val defaultBands =
+                List(bc) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
             spkEqBandsMap[bc] =
                 repository.getStringPreference("spk_eq_bands_$bc", defaultBands).first()
         }
@@ -1370,7 +1385,8 @@ class MainViewModel @Inject constructor(
         val updatedMap = currentState.eqBandsMap.toMutableMap().apply {
             put(oldCount, currentState.eqBands)
         }
-        val defaultBands = List(count) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+        val defaultBands =
+            List(count) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
         val bands = updatedMap[count] ?: defaultBands
         _uiState.update {
             it.copy(
@@ -1419,7 +1435,8 @@ class MainViewModel @Inject constructor(
 
     fun resetEqBands() {
         val bandCount = _uiState.value.eqBandCount
-        val flatBands = List(bandCount) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+        val flatBands =
+            List(bandCount) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
         setEqBands(flatBands)
         _uiState.update { it.copy(eqPresetId = null) }
         viewModelScope.launch { repository.setIntPreference("eq_preset_id", -1) }
@@ -1866,7 +1883,8 @@ class MainViewModel @Inject constructor(
         val updatedMap = currentState.spkEqBandsMap.toMutableMap().apply {
             put(oldCount, currentState.spkEqBands)
         }
-        val defaultBands = List(count) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+        val defaultBands =
+            List(count) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
         val bands = updatedMap[count] ?: defaultBands
         _uiState.update {
             it.copy(
@@ -1916,7 +1934,8 @@ class MainViewModel @Inject constructor(
 
     fun resetSpkEqBands() {
         val bandCount = _uiState.value.spkEqBandCount
-        val flatBands = List(bandCount) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+        val flatBands =
+            List(bandCount) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
         setSpkEqBands(flatBands)
         _uiState.update { it.copy(spkEqPresetId = null) }
         viewModelScope.launch { repository.setIntPreference("spk_eq_preset_id", -1) }

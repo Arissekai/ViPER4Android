@@ -4,6 +4,7 @@ package com.llsl.viper4android.audio
 import com.llsl.viper4android.data.repository.ViperRepository
 import com.llsl.viper4android.ui.screens.main.MainUiState
 import kotlinx.coroutines.flow.first
+import java.util.Locale
 
 object EffectDispatcher {
 
@@ -224,7 +225,13 @@ object EffectDispatcher {
     private fun ensureBandCount(rawBands: String, expectedCount: Int): String {
         val actualCount = rawBands.split(";").count { it.isNotBlank() }
         return if (actualCount != expectedCount) {
-            List(expectedCount) { 0f }.joinToString(";") { "%.1f".format(it) } + ";"
+            List(expectedCount) { 0f }.joinToString(";") {
+                String.format(
+                    Locale.US,
+                    "%.1f",
+                    it
+                )
+            } + ";"
         } else {
             rawBands
         }

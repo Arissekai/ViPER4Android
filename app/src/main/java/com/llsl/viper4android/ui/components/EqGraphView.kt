@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.llsl.viper4android.R
 import com.llsl.viper4android.audio.EffectDispatcher
 import com.llsl.viper4android.data.model.EqPreset
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -360,7 +361,13 @@ fun EqEditDialog(
 
                         val applyBandChange = { newVal: Float ->
                             localBands[index] = newVal.coerceIn(DB_MIN, DB_MAX)
-                            val str = localBands.joinToString(";") { "%.1f".format(it) } + ";"
+                            val str = localBands.joinToString(";") {
+                                String.format(
+                                    Locale.US,
+                                    "%.1f",
+                                    it
+                                )
+                            } + ";"
                             onBandsChange(str)
                         }
 
