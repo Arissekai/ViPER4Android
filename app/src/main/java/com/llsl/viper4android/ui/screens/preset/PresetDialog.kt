@@ -215,7 +215,7 @@ private fun PresetItem(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = if (preset.fxType == 1) "Headphone" else "Speaker",
+                text = stringResource(if (preset.fxType == 1) R.string.tab_headphone else R.string.tab_speaker),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

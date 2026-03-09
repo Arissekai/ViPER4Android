@@ -63,6 +63,7 @@
     <string name="label_eq_preset">Preset</string>
     <string name="label_eq_custom">Custom</string>
     <string name="label_eq_bands">Band Count</string>
+    <string name="label_eq_n_bands">%d Bands</string>
 
     <!-- Convolver -->
     <string name="section_convolver">Convolver</string>
@@ -195,6 +196,18 @@
     <string name="debug_search_hint">Filter logs\u2026</string>
     <string name="action_clear">Clear</string>
     <string name="action_disable_debug">Disable Debug</string>
+
+    <!-- Debug filters -->
+    <string name="debug_filter_all">All</string>
+    <string name="debug_filter_info">Info</string>
+    <string name="debug_filter_debug">Debug</string>
+    <string name="debug_filter_error">Error</string>
+    <string name="debug_filter_app">App</string>
+    <string name="debug_filter_driver">Driver</string>
+    <string name="debug_filter_effect">Effect</string>
+    <string name="debug_filter_dispatch">Dispatch</string>
+    <string name="debug_filter_config">Config</string>
+    <string name="debug_filter_command">Command</string>
     <string name="delete_file_title">Delete File</string>
     <string name="delete_file_message">Delete "%1$s"?</string>
     <string name="action_delete">Delete</string>

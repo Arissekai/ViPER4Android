@@ -64,7 +64,6 @@ private val DB_GRID_LINES = listOf(-12f, -6f, 0f, 6f, 12f)
 @Composable
 fun EqCurveGraph(
     bands: List<Float>,
-    bandLabels: List<String>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     bandCount: Int = 10
@@ -288,7 +287,6 @@ fun EqEditDialog(
             ) {
                 EqCurveGraph(
                     bands = localBands.toList(),
-                    bandLabels = EffectDispatcher.eqBandLabelsForCount(bandCount),
                     onClick = {},
                     modifier = Modifier.height(160.dp),
                     bandCount = bandCount
@@ -320,7 +318,7 @@ fun EqEditDialog(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Save")
+                        Text(stringResource(R.string.action_save))
                     }
                     TextButton(
                         onClick = { presetId?.let { onPresetDelete(it) } },
@@ -332,7 +330,7 @@ fun EqEditDialog(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Delete")
+                        Text(stringResource(R.string.action_delete))
                     }
                     TextButton(onClick = {
                         for (i in localBands.indices) {
@@ -346,7 +344,7 @@ fun EqEditDialog(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Reset")
+                        Text(stringResource(R.string.action_reset))
                     }
                 }
 
@@ -453,12 +451,12 @@ fun EqEditDialog(
     if (showSaveDialog) {
         AlertDialog(
             onDismissRequest = { showSaveDialog = false },
-            title = { Text("Save Preset") },
+            title = { Text(stringResource(R.string.preset_save_title)) },
             text = {
                 OutlinedTextField(
                     value = presetNameInput,
                     onValueChange = { presetNameInput = it },
-                    label = { Text("Preset name") },
+                    label = { Text(stringResource(R.string.preset_name_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

@@ -1,5 +1,6 @@
 package com.llsl.viper4android.ui.screens.debug
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,11 +52,11 @@ private const val MAX_LOG_LINES = 500
 private const val APP_PREFIX = "[App] "
 private const val DRIVER_PREFIX = "[Driver] "
 
-private enum class LogLevel(val label: String) {
-    ALL("All"),
-    INFO("Info"),
-    DEBUG("Debug"),
-    ERROR("Error");
+private enum class LogLevel(@StringRes val labelRes: Int) {
+    ALL(R.string.debug_filter_all),
+    INFO(R.string.debug_filter_info),
+    DEBUG(R.string.debug_filter_debug),
+    ERROR(R.string.debug_filter_error);
 
     fun matches(line: String): Boolean = when (this) {
         ALL -> true
@@ -65,10 +66,10 @@ private enum class LogLevel(val label: String) {
     }
 }
 
-private enum class LogSource(val label: String) {
-    ALL("All"),
-    APP("App"),
-    DRIVER("Driver");
+private enum class LogSource(@StringRes val labelRes: Int) {
+    ALL(R.string.debug_filter_all),
+    APP(R.string.debug_filter_app),
+    DRIVER(R.string.debug_filter_driver);
 
     fun matches(line: String): Boolean = when (this) {
         ALL -> true
@@ -77,12 +78,12 @@ private enum class LogSource(val label: String) {
     }
 }
 
-private enum class LogCategory(val label: String) {
-    ALL("All"),
-    EFFECT("Effect"),
-    DISPATCH("Dispatch"),
-    CONFIG("Config"),
-    COMMAND("Command");
+private enum class LogCategory(@StringRes val labelRes: Int) {
+    ALL(R.string.debug_filter_all),
+    EFFECT(R.string.debug_filter_effect),
+    DISPATCH(R.string.debug_filter_dispatch),
+    CONFIG(R.string.debug_filter_config),
+    COMMAND(R.string.debug_filter_command);
 
     fun matches(line: String): Boolean = when (this) {
         ALL -> true
@@ -233,7 +234,10 @@ fun DebugLogDialog(
                             selected = selectedSource == source,
                             onClick = { selectedSource = source },
                             label = {
-                                Text(source.label, style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    stringResource(source.labelRes),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = colorForSource(source).copy(alpha = 0.2f),
@@ -256,7 +260,10 @@ fun DebugLogDialog(
                             selected = selectedLevel == level,
                             onClick = { selectedLevel = level },
                             label = {
-                                Text(level.label, style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    stringResource(level.labelRes),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = colorForLevel(level).copy(alpha = 0.2f),
@@ -279,7 +286,10 @@ fun DebugLogDialog(
                             selected = selectedCategory == category,
                             onClick = { selectedCategory = category },
                             label = {
-                                Text(category.label, style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    stringResource(category.labelRes),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
                             },
                             modifier = Modifier.height(28.dp)
                         )

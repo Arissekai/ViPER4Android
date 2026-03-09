@@ -41,7 +41,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.llsl.viper4android.R
-import com.llsl.viper4android.audio.EffectDispatcher
 import com.llsl.viper4android.ui.components.EffectSection
 import com.llsl.viper4android.ui.components.EqCurveGraph
 import com.llsl.viper4android.ui.components.EqEditDialog
@@ -416,7 +415,8 @@ fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
     ) {
         var showEqDialog by remember { mutableStateOf(false) }
 
-        val bandCountOptions = listOf("10 Bands", "15 Bands", "25 Bands", "31 Bands")
+        val bandCounts = listOf(10, 15, 25, 31)
+        val bandCountOptions = bandCounts.map { stringResource(R.string.label_eq_n_bands, it) }
         val bandCountIndex = when (eqBandCount) {
             15 -> 1; 25 -> 2; 31 -> 3; else -> 0
         }
@@ -424,13 +424,12 @@ fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
             label = stringResource(R.string.label_eq_bands),
             selectedValue = bandCountOptions[bandCountIndex],
             options = bandCountOptions,
-            onOptionSelected = { index, _ -> onBandCountChange(listOf(10, 15, 25, 31)[index]) }
+            onOptionSelected = { index, _ -> onBandCountChange(bandCounts[index]) }
         )
 
         if (bands.size >= eqBandCount) {
             EqCurveGraph(
                 bands = bands,
-                bandLabels = EffectDispatcher.eqBandLabelsForCount(eqBandCount),
                 onClick = { showEqDialog = true },
                 bandCount = eqBandCount
             )

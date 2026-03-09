@@ -92,10 +92,6 @@ object EffectDispatcher {
         "-1.0;-1.0;-1.0;-1.0;-0.5;-0.5;-0.5;0.0;0.0;0.5;1.0;1.5;2.0;2.5;3.0;3.0;3.0;3.0;2.5;2.5;2.0;1.5;1.5;1.0;0.5;0.5;0.0;-0.5;-0.5;-1.0;-1.0;"
     )
 
-    fun eqPresetsForCount(count: Int): List<String> = when (count) {
-        15 -> EQ_PRESETS_15; 25 -> EQ_PRESETS_25; 31 -> EQ_PRESETS_31; else -> EQ_PRESETS
-    }
-
     val DYNAMIC_SYSTEM_DEVICES = listOf(
         "140;6200;40;60;10;80",
         "180;5800;55;80;10;70",
@@ -216,7 +212,6 @@ object EffectDispatcher {
         "16kHz",
         "20kHz"
     )
-    val EQ_BAND_LABELS = EQ_BAND_LABELS_10
 
     fun eqBandLabelsForCount(count: Int): List<String> = when (count) {
         15 -> EQ_BAND_LABELS_15; 25 -> EQ_BAND_LABELS_25; 31 -> EQ_BAND_LABELS_31; else -> EQ_BAND_LABELS_10

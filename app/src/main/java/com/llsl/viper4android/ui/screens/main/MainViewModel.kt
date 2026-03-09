@@ -256,8 +256,6 @@ class MainViewModel @Inject constructor(
         val VSE_BARK_VALUES get() = EffectDispatcher.VSE_BARK_VALUES
         val DIFF_SURROUND_DELAY_VALUES get() = EffectDispatcher.DIFF_SURROUND_DELAY_VALUES
         val FIELD_SURROUND_WIDENING_VALUES get() = EffectDispatcher.FIELD_SURROUND_WIDENING_VALUES
-        val DYNAMIC_SYSTEM_DEVICES get() = EffectDispatcher.DYNAMIC_SYSTEM_DEVICES
-        val DYNAMIC_SYSTEM_DEVICE_NAMES get() = EffectDispatcher.DYNAMIC_SYSTEM_DEVICE_NAMES
         val BASS_GAIN_DB_LABELS get() = EffectDispatcher.BASS_GAIN_DB_LABELS
         val CLARITY_GAIN_DB_LABELS get() = EffectDispatcher.CLARITY_GAIN_DB_LABELS
 
@@ -294,8 +292,8 @@ class MainViewModel @Inject constructor(
     private var serviceBound = false
     private val audioOutputDetector = AudioOutputDetector(application)
     private var activeDeviceType: Int = ViperParams.FX_TYPE_HEADPHONE
-    private var eqPresetsJob: kotlinx.coroutines.Job? = null
-    private var spkEqPresetsJob: kotlinx.coroutines.Job? = null
+    private var eqPresetsJob: Job? = null
+    private var spkEqPresetsJob: Job? = null
     private var dsPresetsJob: Job? = null
 
     private val serviceConnection = object : ServiceConnection {
@@ -1696,13 +1694,6 @@ class MainViewModel @Inject constructor(
         hpDispatchDynamicSystem()
     }
 
-    fun setDynamicSystemDevice(index: Int) {
-        _uiState.update { it.copy(dynamicSystemDevice = index) }
-        viewModelScope.launch { repository.setIntPreference("dynamic_system_device", index) }
-        val presetId = (index + 1).toLong()
-        setDsPreset(presetId)
-    }
-
     fun setDynamicSystemStrength(value: Int) {
         _uiState.update { it.copy(dynamicSystemStrength = value) }
         viewModelScope.launch {
@@ -2544,13 +2535,6 @@ class MainViewModel @Inject constructor(
             )
         }
         spkDispatchDynamicSystem()
-    }
-
-    fun setSpkDynamicSystemDevice(index: Int) {
-        _uiState.update { it.copy(spkDynamicSystemDevice = index) }
-        viewModelScope.launch { repository.setIntPreference("spk_dynamic_system_device", index) }
-        val presetId = (index + 1).toLong()
-        setSpkDsPreset(presetId)
     }
 
     fun setSpkDynamicSystemStrength(value: Int) {

@@ -179,7 +179,10 @@ fun MainScreen(
                 actions = {
                     if (debugMode) {
                         IconButton(onClick = { showDebugLog = true }) {
-                            Icon(Icons.Default.BugReport, contentDescription = "Debug Log")
+                            Icon(
+                                Icons.Default.BugReport,
+                                contentDescription = stringResource(R.string.debug_log_title)
+                            )
                         }
                     }
                     IconButton(onClick = { showDriverStatusDialog = true }) {
