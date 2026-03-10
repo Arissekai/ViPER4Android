@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    How to add a new language:
+    1. Create a new directory: res/values-{qualifier}/strings.xml
+       See examples: https://developer.android.com/guide/topics/resources/app-languages#sample-config
+    2. Copy this file as a starting template.
+    3. Translate each <string> value (keep the name attribute unchanged).
+    4. Register the locale in res/xml/locales_config.xml:
+         <locale android:name="{BCP 47 tag}" />
+    5. Add the resource qualifier to resourceConfigurations in app/build.gradle.kts:
+         resourceConfigurations += listOf("en", "{new qualifier}")
+    6. Strings that should NOT be translated (e.g. brand names like "ViPER4Android")
+       can be omitted from this file, the default English value will be used.
+-->
+<resources>
+    <string name="app_name">placeholder</string>
+    <string name="notification_channel_id">placeholder</string>
+    <string name="notification_channel_name">placeholder</string>
+    <string name="notification_channel_description">placeholder</string>
+    <string name="notification_title">placeholder</string>
+    <string name="notification_text">placeholder</string>
+
+    <!-- Tabs -->
+    <string name="tab_headphone">placeholder</string>
+    <string name="tab_speaker">placeholder</string>
+
+    <!-- Master -->
+    <string name="master_enable">placeholder</string>
+    <string name="menu_driver_status">placeholder</string>
+    <string name="menu_presets">placeholder</string>
+    <string name="menu_settings">placeholder</string>
+
+    <!-- Output / Master limiter -->
+    <string name="section_output">placeholder</string>
+    <string name="label_volume">placeholder</string>
+    <string name="label_pan">placeholder</string>
+    <string name="label_limiter">placeholder</string>
+
+    <!-- AGC -->
+    <string name="section_agc">placeholder</string>
+    <string name="label_agc_strength">placeholder</string>
+    <string name="label_agc_max_gain">placeholder</string>
+    <string name="label_agc_output_threshold">placeholder</string>
+
+    <!-- FET Compressor -->
+    <string name="section_fet_compressor">placeholder</string>
+    <string name="label_fet_threshold">placeholder</string>
+    <string name="label_fet_ratio">placeholder</string>
+    <string name="label_fet_knee">placeholder</string>
+    <string name="label_fet_auto_knee">placeholder</string>
+    <string name="label_fet_knee_multi">placeholder</string>
+    <string name="label_fet_gain">placeholder</string>
+    <string name="label_fet_auto_gain">placeholder</string>
+    <string name="label_fet_attack">placeholder</string>
+    <string name="label_fet_auto_attack">placeholder</string>
+    <string name="label_fet_max_attack">placeholder</string>
+    <string name="label_fet_release">placeholder</string>
+    <string name="label_fet_auto_release">placeholder</string>
+    <string name="label_fet_max_release">placeholder</string>
+    <string name="label_fet_crest">placeholder</string>
+    <string name="label_fet_adapt">placeholder</string>
+    <string name="label_fet_no_clip">placeholder</string>
+
+    <!-- DDC -->
+    <string name="section_ddc">placeholder</string>
+    <string name="label_ddc_device">placeholder</string>
+    <string name="label_ddc_none">placeholder</string>
+
+    <!-- Spectrum Extension -->
+    <string name="section_spectrum_extension">placeholder</string>
+    <string name="label_vse_strength">placeholder</string>
+    <string name="label_vse_exciter">placeholder</string>
+
+    <!-- Equalizer -->
+    <string name="section_equalizer">placeholder</string>
+    <string name="label_eq_preset">placeholder</string>
+    <string name="label_eq_custom">placeholder</string>
+    <string name="label_eq_bands">placeholder</string>
+    <string name="label_eq_n_bands">placeholder</string>
+
+    <!-- Convolver -->
+    <string name="section_convolver">placeholder</string>
+    <string name="label_convolver_kernel">placeholder</string>
+    <string name="label_convolver_none">placeholder</string>
+    <string name="label_convolver_cross_channel">placeholder</string>
+
+    <!-- Field Surround -->
+    <string name="section_field_surround">placeholder</string>
+    <string name="label_fs_widening">placeholder</string>
+    <string name="label_fs_mid_image">placeholder</string>
+    <string name="label_fs_depth">placeholder</string>
+
+    <!-- Differential Surround -->
+    <string name="section_differential_surround">placeholder</string>
+    <string name="label_ds_delay">placeholder</string>
+
+    <!-- Headphone Surround -->
+    <string name="section_headphone_surround">placeholder</string>
+    <string name="label_vhe_quality">placeholder</string>
+
+    <!-- Reverberation -->
+    <string name="section_reverberation">placeholder</string>
+    <string name="label_reverb_room_size">placeholder</string>
+    <string name="label_reverb_width">placeholder</string>
+    <string name="label_reverb_dampening">placeholder</string>
+    <string name="label_reverb_wet">placeholder</string>
+    <string name="label_reverb_dry">placeholder</string>
+
+    <!-- Dynamic System -->
+    <string name="section_dynamic_system">placeholder</string>
+    <string name="label_ds_device">placeholder</string>
+    <string name="label_ds_strength">placeholder</string>
+    <string name="label_ds_preset">placeholder</string>
+    <string name="label_ds_custom">placeholder</string>
+    <string name="label_ds_x_low_freq">placeholder</string>
+    <string name="label_ds_x_high_freq">placeholder</string>
+    <string name="label_ds_y_low_freq">placeholder</string>
+    <string name="label_ds_y_high_freq">placeholder</string>
+    <string name="label_ds_side_gain_low">placeholder</string>
+    <string name="label_ds_side_gain_high">placeholder</string>
+
+    <!-- Tube Simulator -->
+    <string name="section_tube_simulator">placeholder</string>
+
+    <!-- ViPER Bass -->
+    <string name="section_viper_bass">placeholder</string>
+    <string name="label_bass_mode">placeholder</string>
+    <string name="label_bass_frequency">placeholder</string>
+    <string name="label_bass_gain">placeholder</string>
+
+    <!-- ViPER Clarity -->
+    <string name="section_viper_clarity">placeholder</string>
+    <string name="label_clarity_mode">placeholder</string>
+    <string name="label_clarity_gain">placeholder</string>
+
+    <!-- Cure -->
+    <string name="section_cure">placeholder</string>
+    <string name="label_cure_strength">placeholder</string>
+
+    <!-- AnalogX -->
+    <string name="section_analogx">placeholder</string>
+    <string name="label_analogx_mode">placeholder</string>
+
+    <!-- Speaker Optimization -->
+    <string name="section_speaker_optimization">placeholder</string>
+
+    <!-- Bass modes -->
+    <string name="bass_mode_natural">placeholder</string>
+    <string name="bass_mode_pure">placeholder</string>
+    <string name="bass_mode_subwoofer">placeholder</string>
+
+    <!-- Clarity modes -->
+    <string name="clarity_mode_natural">placeholder</string>
+    <string name="clarity_mode_ozone">placeholder</string>
+    <string name="clarity_mode_xhifi">placeholder</string>
+
+    <!-- Cure levels -->
+    <string name="cure_level_mild">placeholder</string>
+    <string name="cure_level_medium">placeholder</string>
+    <string name="cure_level_strong">placeholder</string>
+
+    <!-- AnalogX modes -->
+    <string name="analogx_mode_mild">placeholder</string>
+    <string name="analogx_mode_medium">placeholder</string>
+    <string name="analogx_mode_strong">placeholder</string>
+
+    <!-- Presets -->
+    <string name="preset_save_title">placeholder</string>
+    <string name="preset_rename_title">placeholder</string>
+    <string name="preset_name_hint">placeholder</string>
+    <string name="preset_empty">placeholder</string>
+    <string name="preset_deleted">placeholder</string>
+    <string name="preset_save_current">placeholder</string>
+
+    <!-- Driver Status -->
+    <string name="driver_not_found">placeholder</string>
+    <string name="driver_version_code">placeholder</string>
+    <string name="driver_version_name">placeholder</string>
+    <string name="driver_architecture">placeholder</string>
+    <string name="driver_streaming">placeholder</string>
+    <string name="driver_sampling_rate">placeholder</string>
+    <string name="status_active">placeholder</string>
+    <string name="status_inactive">placeholder</string>
+    <string name="status_unknown">placeholder</string>
+
+    <!-- Settings -->
+    <string name="settings_auto_start">placeholder</string>
+    <string name="settings_aidl_mode">placeholder</string>
+    <string name="settings_driver_version">placeholder</string>
+    <string name="settings_driver_arch">placeholder</string>
+    <string name="settings_app_version">placeholder</string>
+    <string name="settings_files_section">placeholder</string>
+    <string name="settings_import_preset">placeholder</string>
+    <string name="settings_import_kernel">placeholder</string>
+    <string name="settings_import_vdc">placeholder</string>
+    <string name="import_success">placeholder</string>
+    <string name="import_failed">placeholder</string>
+
+    <!-- Actions -->
+    <string name="action_save">placeholder</string>
+    <string name="action_cancel">placeholder</string>
+    <string name="action_close">placeholder</string>
+    <string name="action_rename">placeholder</string>
+    <string name="action_reset">placeholder</string>
+
+    <!-- Debug -->
+    <string name="debug_log_title">placeholder</string>
+    <string name="debug_mode_enabled">placeholder</string>
+    <string name="debug_search_hint">placeholder</string>
+    <string name="action_clear">placeholder</string>
+    <string name="action_disable_debug">placeholder</string>
+
+    <!-- Debug filters -->
+    <string name="debug_filter_all">placeholder</string>
+    <string name="debug_filter_info">placeholder</string>
+    <string name="debug_filter_debug">placeholder</string>
+    <string name="debug_filter_error">placeholder</string>
+    <string name="debug_filter_app">placeholder</string>
+    <string name="debug_filter_driver">placeholder</string>
+    <string name="debug_filter_effect">placeholder</string>
+    <string name="debug_filter_dispatch">placeholder</string>
+    <string name="debug_filter_config">placeholder</string>
+    <string name="debug_filter_command">placeholder</string>
+    <string name="delete_file_title">placeholder</string>
+    <string name="delete_file_message">placeholder</string>
+    <string name="action_delete">placeholder</string>
+    <string name="file_deleted">placeholder</string>
+
+    <!-- EQ presets -->
+    <string name="eq_preset_acoustic">placeholder</string>
+    <string name="eq_preset_bass_booster">placeholder</string>
+    <string name="eq_preset_bass_reducer">placeholder</string>
+    <string name="eq_preset_classical">placeholder</string>
+    <string name="eq_preset_deep">placeholder</string>
+    <string name="eq_preset_flat">placeholder</string>
+    <string name="eq_preset_rnb">placeholder</string>
+    <string name="eq_preset_rock">placeholder</string>
+    <string name="eq_preset_small_speakers">placeholder</string>
+    <string name="eq_preset_treble_booster">placeholder</string>
+    <string name="eq_preset_treble_reducer">placeholder</string>
+    <string name="eq_preset_vocal_booster">placeholder</string>
+</resources>
