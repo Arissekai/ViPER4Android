@@ -704,7 +704,8 @@ fun DynamicSystemSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.Speaker
     ) {
-        val presetName = dsPresets.find { it.id == dsPresetId }?.name ?: "Custom"
+        val presetName =
+            dsPresets.find { it.id == dsPresetId }?.name ?: stringResource(R.string.label_ds_custom)
         LabeledDropdown(
             label = stringResource(R.string.label_ds_preset),
             selectedValue = presetName,
@@ -897,13 +898,13 @@ fun ViperBassSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
             label = stringResource(R.string.label_bass_gain),
             value = bassGain.toFloat(),
             onValueChange = { onGainChange(it.roundToInt()) },
-            valueRange = 0f..11f,
-            steps = 10,
+            valueRange = 0f..19f,
+            steps = 18,
             valueLabel = "${
-                MainViewModel.BASS_GAIN_DB_LABELS.getOrElse(bassGain) {
-                    "%.1f".format(
-                        bassGain * 0.5
-                    )
+                if (bassMode == 2) {
+                    MainViewModel.BASS_SUBWOOFER_GAIN_DB_LABELS.getOrElse(bassGain) { "--" }
+                } else {
+                    MainViewModel.BASS_GAIN_DB_LABELS.getOrElse(bassGain) { "--" }
                 }
             }dB"
         )
@@ -954,9 +955,15 @@ fun ViperBassMonoSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
             label = stringResource(R.string.label_bass_gain),
             value = gain.toFloat(),
             onValueChange = { onGainChange(it.roundToInt()) },
-            valueRange = 50f..1000f,
-            steps = 94,
-            valueLabel = "$gain"
+            valueRange = 0f..19f,
+            steps = 18,
+            valueLabel = "${
+                if (mode == 2) {
+                    MainViewModel.BASS_SUBWOOFER_GAIN_DB_LABELS.getOrElse(gain) { "--" }
+                } else {
+                    MainViewModel.BASS_GAIN_DB_LABELS.getOrElse(gain) { "--" }
+                }
+            }dB"
         )
     }
 }
