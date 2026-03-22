@@ -46,7 +46,8 @@ object ConfigChannel {
     private const val SHM_HP_PATH = "/data/local/tmp/v4a/shm_hp.bin"
     private const val SHM_SPK_PATH = "/data/local/tmp/v4a/shm_spk.bin"
     private const val SHM_MAGIC = 0x56344D53
-    private const val FORMAT_VERSION = 3
+    private const val FORMAT_VERSION = 4
+    private const val STREAMING_TIMEOUT_MS = 250L
     private const val STATUS_SHM_SIZE = 256
     private const val PARAM_SHM_SIZE = 32784
     private const val PARAMS_OFFSET = 16
@@ -320,9 +321,8 @@ object ConfigChannel {
             if (buf != null) {
                 val statusSeq = buf.getInt(8)
                 if (statusSeq == 0) return cachedStatus
-                if (statusSeq == lastStatusSeq) return cachedStatus
-                lastStatusSeq = statusSeq
                 cachedStatus = parseStatusFromShm(buf)
+                lastStatusSeq = statusSeq
                 return cachedStatus
             }
             return readStatusViaSu()
@@ -336,18 +336,20 @@ object ConfigChannel {
         val base = STATUS_DATA_OFFSET
         val enabled = buf.getInt(base) != 0
         val configured = buf.getInt(base + 4) != 0
-        val streaming = buf.getInt(base + 8) != 0
-        val sampleRate = buf.getInt(base + 12)
-        val versionCode = buf.getInt(base + 16)
+        val processTimeMs = buf.getLong(base + 8)
+        val streaming = processTimeMs > 0 &&
+                System.currentTimeMillis() - processTimeMs < STREAMING_TIMEOUT_MS
+        val sampleRate = buf.getInt(base + 16)
+        val versionCode = buf.getInt(base + 20)
 
         val nameBytes = ByteArray(64)
-        buf.position(base + 20)
+        buf.position(base + 24)
         buf.get(nameBytes)
         val nameEnd = nameBytes.indexOf(0.toByte())
         val versionName = if (nameEnd >= 0) String(nameBytes, 0, nameEnd) else String(nameBytes)
 
         val archBytes = ByteArray(32)
-        buf.position(base + 84)
+        buf.position(base + 88)
         buf.get(archBytes)
         val archEnd = archBytes.indexOf(0.toByte())
         val architecture = if (archEnd >= 0) String(archBytes, 0, archEnd) else String(archBytes)
@@ -379,18 +381,20 @@ object ConfigChannel {
             val buf = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
             val enabled = buf.getInt(0) != 0
             val configured = buf.getInt(4) != 0
-            val streaming = buf.getInt(8) != 0
-            val sampleRate = buf.getInt(12)
-            val versionCode = buf.getInt(16)
+            val processTimeMs = buf.getLong(8)
+            val streaming = processTimeMs > 0 &&
+                    System.currentTimeMillis() - processTimeMs < STREAMING_TIMEOUT_MS
+            val sampleRate = buf.getInt(16)
+            val versionCode = buf.getInt(20)
 
             val nameBytes = ByteArray(64)
-            buf.position(20)
+            buf.position(24)
             buf.get(nameBytes)
             val nameEnd = nameBytes.indexOf(0.toByte())
             val versionName = if (nameEnd >= 0) String(nameBytes, 0, nameEnd) else String(nameBytes)
 
             val archBytes = ByteArray(32)
-            buf.position(84)
+            buf.position(88)
             buf.get(archBytes)
             val archEnd = archBytes.indexOf(0.toByte())
             val architecture =

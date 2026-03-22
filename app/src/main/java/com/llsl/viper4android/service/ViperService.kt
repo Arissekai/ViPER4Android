@@ -148,7 +148,7 @@ class ViperService : LifecycleService() {
                     "Service",
                     "AIDL shm apply full state (master=$isMasterOn fxType=$fxType)"
                 )
-                dispatchFullStateViaFile(activeState, isMasterOn)
+                dispatchFullStateViaFile(activeState)
             }
             return
         }
@@ -378,7 +378,7 @@ class ViperService : LifecycleService() {
                 "Service",
                 "AIDL shm full state dispatch (master=$masterEnabled fxType=${state.fxType})"
             )
-            dispatchFullStateViaFile(state, masterEnabled, byteArrayParams)
+            dispatchFullStateViaFile(state, byteArrayParams)
             return
         }
         globalEffect?.let { effect ->
@@ -394,16 +394,9 @@ class ViperService : LifecycleService() {
 
     private fun dispatchFullStateViaFile(
         state: MainUiState,
-        masterEnabled: Boolean,
         byteArrayParams: List<ByteArrayParam>? = null
     ) {
         val params = mutableListOf<ParamEntry>()
-        params.add(
-            ParamEntry(
-                ViperParams.PARAM_SET_UPDATE_STATUS,
-                intArrayOf(if (masterEnabled) 1 else 0)
-            )
-        )
         if (state.fxType == ViperParams.FX_TYPE_HEADPHONE) {
             collectHeadphoneParams(params, state)
         } else {

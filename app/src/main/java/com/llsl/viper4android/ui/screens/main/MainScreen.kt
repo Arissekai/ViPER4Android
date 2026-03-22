@@ -46,6 +46,7 @@ import com.llsl.viper4android.ui.screens.debug.DebugLogDialog
 import com.llsl.viper4android.ui.screens.preset.PresetDialog
 import com.llsl.viper4android.ui.screens.settings.SettingsDialog
 import com.llsl.viper4android.ui.screens.status.DriverStatusDialog
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +91,12 @@ fun MainScreen(
     }
 
     if (showDriverStatusDialog) {
-        LaunchedEffect(Unit) { viewModel.queryDriverStatus() }
+        LaunchedEffect(Unit) {
+            while (true) {
+                viewModel.queryDriverStatus()
+                delay(500)
+            }
+        }
         DriverStatusDialog(
             driverStatus = driverStatus,
             onDismiss = { showDriverStatusDialog = false }

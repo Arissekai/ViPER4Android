@@ -328,7 +328,6 @@ object EffectDispatcher {
             "Dispatch",
             "Dispatch: fullState mode=$mode master=${if (masterEnabled) "ON" else "OFF"}"
         )
-        effect.setParameter(ViperParams.PARAM_SET_UPDATE_STATUS, if (masterEnabled) 1 else 0)
         if (state.fxType == ViperParams.FX_TYPE_HEADPHONE) {
             dispatchHeadphoneState(effect, state)
         } else {

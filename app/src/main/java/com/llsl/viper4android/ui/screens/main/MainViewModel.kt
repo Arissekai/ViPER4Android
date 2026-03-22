@@ -1113,7 +1113,6 @@ class MainViewModel @Inject constructor(
         }
         if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) {
             viperService?.setEffectEnabled(enabled)
-            dispatchInt(ViperParams.PARAM_SET_UPDATE_STATUS, if (enabled) 1 else 0)
             if (enabled) applyFullState()
         }
     }
@@ -1126,7 +1125,6 @@ class MainViewModel @Inject constructor(
         }
         if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) {
             viperService?.setEffectEnabled(enabled)
-            dispatchInt(ViperParams.PARAM_SET_UPDATE_STATUS, if (enabled) 1 else 0)
             if (enabled) applyFullState()
         }
     }
