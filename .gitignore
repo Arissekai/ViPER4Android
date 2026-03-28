@@ -14,3 +14,4 @@ local.properties
 .kotlin/
 *.jks
 *.keystore
+/apk
