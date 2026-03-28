@@ -7,7 +7,6 @@ import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import com.llsl.viper4android.utils.FileLogger
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,7 +55,9 @@ class AudioOutputDetector(context: Context) {
             AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
             AudioDeviceInfo.TYPE_WIRED_HEADSET,
             AudioDeviceInfo.TYPE_USB_HEADSET,
-            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+            AudioDeviceInfo.TYPE_BLE_HEADSET,
+            AudioDeviceInfo.TYPE_BLE_BROADCAST
         )
 
         fun isHeadphoneConnected(audioManager: AudioManager): Boolean =
