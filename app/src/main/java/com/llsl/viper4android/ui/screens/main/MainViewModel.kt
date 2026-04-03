@@ -51,8 +51,9 @@ data class DriverStatus(
 )
 
 data class MainUiState(
-    val masterEnabled: Boolean = false,
     val fxType: Int = ViperParams.FX_TYPE_HEADPHONE,
+
+    val masterEnabled: Boolean = false,
 
     val outputVolume: Int = 11,
     val channelPan: Int = 0,
@@ -153,12 +154,52 @@ data class MainUiState(
     val analogxEnabled: Boolean = false,
     val analogxMode: Int = 0,
 
+    val spkMasterEnabled: Boolean = false,
+
+    val spkOutputVolume: Int = 11,
+    val spkChannelPan: Int = 0,
+    val spkLimiter: Int = 5,
+
+    val spkAgcEnabled: Boolean = false,
+    val spkAgcStrength: Int = 0,
+    val spkAgcMaxGain: Int = 3,
+    val spkAgcOutputThreshold: Int = 3,
+
+    val spkFetEnabled: Boolean = false,
+    val spkFetThreshold: Int = 100,
+    val spkFetRatio: Int = 100,
+    val spkFetAutoKnee: Boolean = true,
+    val spkFetKnee: Int = 0,
+    val spkFetKneeMulti: Int = 0,
+    val spkFetAutoGain: Boolean = true,
+    val spkFetGain: Int = 0,
+    val spkFetAutoAttack: Boolean = true,
+    val spkFetAttack: Int = 20,
+    val spkFetMaxAttack: Int = 80,
+    val spkFetAutoRelease: Boolean = true,
+    val spkFetRelease: Int = 50,
+    val spkFetMaxRelease: Int = 100,
+    val spkFetCrest: Int = 100,
+    val spkFetAdapt: Int = 50,
+    val spkFetNoClip: Boolean = true,
+
     val spkDdcEnabled: Boolean = false,
     val spkDdcDevice: String = "",
 
     val spkVseEnabled: Boolean = false,
     val spkVseStrength: Int = 10,
     val spkVseExciter: Int = 0,
+
+    val spkEqEnabled: Boolean = false,
+    val spkEqBandCount: Int = 10,
+    val spkEqPresetId: Long? = null,
+    val spkEqBands: String = "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;",
+    val spkEqBandsMap: Map<Int, String> = mapOf(10 to "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;"),
+    val spkEqPresets: List<EqPreset> = emptyList(),
+
+    val spkConvolverEnabled: Boolean = false,
+    val spkConvolverKernel: String = "",
+    val spkConvolverCrossChannel: Int = 0,
 
     val spkFieldSurroundEnabled: Boolean = false,
     val spkFieldSurroundWidening: Int = 0,
@@ -170,6 +211,13 @@ data class MainUiState(
 
     val spkVheEnabled: Boolean = false,
     val spkVheQuality: Int = 0,
+
+    val spkReverbEnabled: Boolean = false,
+    val spkReverbRoomSize: Int = 0,
+    val spkReverbWidth: Int = 0,
+    val spkReverbDampening: Int = 0,
+    val spkReverbWet: Int = 0,
+    val spkReverbDry: Int = 50,
 
     val spkDynamicSystemEnabled: Boolean = false,
     val spkDynamicSystemDevice: Int = 0,
@@ -207,54 +255,7 @@ data class MainUiState(
     val spkAnalogxEnabled: Boolean = false,
     val spkAnalogxMode: Int = 0,
 
-    val spkChannelPan: Int = 0,
-
-    val spkMasterEnabled: Boolean = false,
     val speakerOptEnabled: Boolean = false,
-
-    val spkConvolverEnabled: Boolean = false,
-    val spkConvolverKernel: String = "",
-    val spkConvolverCrossChannel: Int = 0,
-
-    val spkEqEnabled: Boolean = false,
-    val spkEqBandCount: Int = 10,
-    val spkEqPresetId: Long? = null,
-    val spkEqBands: String = "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;",
-    val spkEqBandsMap: Map<Int, String> = mapOf(10 to "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;"),
-    val spkEqPresets: List<EqPreset> = emptyList(),
-
-    val spkReverbEnabled: Boolean = false,
-    val spkReverbRoomSize: Int = 0,
-    val spkReverbWidth: Int = 0,
-    val spkReverbDampening: Int = 0,
-    val spkReverbWet: Int = 0,
-    val spkReverbDry: Int = 50,
-
-    val spkAgcEnabled: Boolean = false,
-    val spkAgcStrength: Int = 0,
-    val spkAgcMaxGain: Int = 3,
-    val spkAgcOutputThreshold: Int = 3,
-
-    val spkFetEnabled: Boolean = false,
-    val spkFetThreshold: Int = 100,
-    val spkFetRatio: Int = 100,
-    val spkFetAutoKnee: Boolean = true,
-    val spkFetKnee: Int = 0,
-    val spkFetKneeMulti: Int = 0,
-    val spkFetAutoGain: Boolean = true,
-    val spkFetGain: Int = 0,
-    val spkFetAutoAttack: Boolean = true,
-    val spkFetAttack: Int = 20,
-    val spkFetMaxAttack: Int = 80,
-    val spkFetAutoRelease: Boolean = true,
-    val spkFetRelease: Int = 50,
-    val spkFetMaxRelease: Int = 100,
-    val spkFetCrest: Int = 100,
-    val spkFetAdapt: Int = 50,
-    val spkFetNoClip: Boolean = true,
-
-    val spkOutputVolume: Int = 11,
-    val spkLimiter: Int = 5
 )
 
 @HiltViewModel
@@ -412,75 +413,21 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun loadHeadphonePreferences() {
-        val masterEnabled =
-            repository.getBooleanPreference(ViperRepository.PREF_MASTER_ENABLE).first()
         val fxType =
             repository.getIntPreference(ViperRepository.PREF_FX_TYPE, ViperParams.FX_TYPE_HEADPHONE)
                 .first()
+        val state = loadEffectPrefs(repository, isSpk = false, state = _uiState.value)
 
-        val outputVolume =
-            repository.getIntPreference("${ViperParams.PARAM_HP_OUTPUT_VOLUME}", 11).first()
-        val channelPan =
-            repository.getIntPreference("${ViperParams.PARAM_HP_CHANNEL_PAN}", 0).first()
-        val limiter = repository.getIntPreference("${ViperParams.PARAM_HP_LIMITER}", 5).first()
-
-        val agcEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_AGC_ENABLE}").first()
-        val fetEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_ENABLE}").first()
-        val ddcEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_DDC_ENABLE}").first()
-        val ddcDevice = repository.getStringPreference("ddc_device", "").first()
-        val vseEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_ENABLE}")
-                .first()
-        val eqEnabled = repository.getBooleanPreference("${ViperParams.PARAM_HP_EQ_ENABLE}").first()
-        val convolverEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_CONVOLVER_ENABLE}").first()
-        val convolverKernel = repository.getStringPreference("convolver_kernel", "").first()
-        val fieldSurroundEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_FIELD_SURROUND_ENABLE}").first()
-        val diffSurroundEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_DIFF_SURROUND_ENABLE}").first()
-        val vheEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_HEADPHONE_SURROUND_ENABLE}")
-                .first()
-        val reverbEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_REVERB_ENABLE}").first()
-        val dynamicSystemEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_ENABLE}").first()
-        val tubeSimulatorEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_TUBE_SIMULATOR_ENABLE}").first()
-        val bassEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_ENABLE}").first()
-        val bassMonoEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_MONO_ENABLE}").first()
-        val clarityEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_CLARITY_ENABLE}").first()
-        val cureEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_CURE_ENABLE}").first()
-        val analogxEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_ANALOGX_ENABLE}").first()
-
-        val eqBandCount = repository.getIntPreference("eq_band_count", 10).first()
-        val rawEqBands = repository.getStringPreference(
-            "${ViperParams.PARAM_HP_EQ_BAND_LEVEL}",
-            "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;"
-        ).first()
+        val eqBandCount = state.eqBandCount
+        val rawEqBands = state.eqBands
         val parsedBandCount = rawEqBands.split(";").count { it.isNotBlank() }
         val eqBands = if (parsedBandCount != eqBandCount) {
             List(eqBandCount) { 0f }.joinToString(";") {
-                String.format(
-                    Locale.US,
-                    "%.1f",
-                    it
-                )
+                String.format(Locale.US, "%.1f", it)
             } + ";"
         } else {
             rawEqBands
         }
-        val eqPresetId = repository.getIntPreference("eq_preset_id", -1).first()
-            .let { if (it < 0) null else it.toLong() }
         val eqBandsMap = mutableMapOf<Int, String>()
         for (bc in listOf(10, 15, 25, 31)) {
             val defaultBands =
@@ -488,343 +435,25 @@ class MainViewModel @Inject constructor(
             eqBandsMap[bc] = repository.getStringPreference("eq_bands_$bc", defaultBands).first()
         }
         eqBandsMap[eqBandCount] = eqBands
-        val vseStrength =
-            repository.getIntPreference("${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_BARK}", 10)
-                .first()
-        val vseExciter = repository.getIntPreference(
-            "${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_BARK_RECONSTRUCT}",
-            0
-        ).first()
-        val fieldSurroundWidening =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FIELD_SURROUND_WIDENING}", 0)
-                .first()
-        val fieldSurroundMidImage =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FIELD_SURROUND_MID_IMAGE}", 5)
-                .first()
-        val fieldSurroundDepth =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FIELD_SURROUND_DEPTH}", 0).first()
-        val diffSurroundDelay =
-            repository.getIntPreference("${ViperParams.PARAM_HP_DIFF_SURROUND_DELAY}", 4).first()
-        val vheQuality =
-            repository.getIntPreference("${ViperParams.PARAM_HP_HEADPHONE_SURROUND_STRENGTH}", 0)
-                .first()
-        val dynamicSystemDevice = repository.getIntPreference("dynamic_system_device", 0).first()
-        val dynamicSystemStrength =
-            repository.getIntPreference("${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_STRENGTH}", 50)
-                .first()
-        val dsPresetId = repository.getIntPreference("ds_preset_id", -1).first()
-            .let { if (it < 0) null else it.toLong() }
-        val dsXLow = repository.getIntPreference("ds_x_low", 100).first()
-        val dsXHigh = repository.getIntPreference("ds_x_high", 5600).first()
-        val dsYLow = repository.getIntPreference("ds_y_low", 40).first()
-        val dsYHigh = repository.getIntPreference("ds_y_high", 80).first()
-        val dsSideGainLow = repository.getIntPreference("ds_side_gain_low", 50).first()
-        val dsSideGainHigh = repository.getIntPreference("ds_side_gain_high", 50).first()
-        val bassMode = repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MODE}", 0).first()
-        val bassFrequency =
-            repository.getIntPreference("${ViperParams.PARAM_HP_BASS_FREQUENCY}", 55).first()
-        val bassGain = repository.getIntPreference("${ViperParams.PARAM_HP_BASS_GAIN}", 0).first()
-        val bassAntiPop =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_ANTI_POP}", true).first()
-        val bassMonoMode =
-            repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_MODE}", 0).first()
-        val bassMonoFrequency =
-            repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_FREQUENCY}", 55).first()
-        val bassMonoGain =
-            repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_GAIN}", 0).first()
-        val bassMonoAntiPop =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_MONO_ANTI_POP}", true)
-                .first()
-        val clarityMode =
-            repository.getIntPreference("${ViperParams.PARAM_HP_CLARITY_MODE}", 0).first()
-        val clarityGain =
-            repository.getIntPreference("${ViperParams.PARAM_HP_CLARITY_GAIN}", 1).first()
-        val cureStrength =
-            repository.getIntPreference("${ViperParams.PARAM_HP_CURE_STRENGTH}", 0).first()
-        val analogxMode =
-            repository.getIntPreference("${ViperParams.PARAM_HP_ANALOGX_MODE}", 0).first()
-
-        val reverbRoomSize =
-            repository.getIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_SIZE}", 0).first()
-        val reverbWidth =
-            repository.getIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_WIDTH}", 0).first()
-        val reverbDampening =
-            repository.getIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_DAMPENING}", 0).first()
-        val reverbWet =
-            repository.getIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_WET_SIGNAL}", 0).first()
-        val reverbDry =
-            repository.getIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_DRY_SIGNAL}", 50)
-                .first()
-
-        val agcStrength =
-            repository.getIntPreference("${ViperParams.PARAM_HP_AGC_RATIO}", 0).first()
-        val agcMaxGain =
-            repository.getIntPreference("${ViperParams.PARAM_HP_AGC_MAX_SCALER}", 3).first()
-        val agcOutputThreshold =
-            repository.getIntPreference("${ViperParams.PARAM_HP_AGC_VOLUME}", 3).first()
-
-        val fetThreshold =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_THRESHOLD}", 100)
-                .first()
-        val fetRatio =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_RATIO}", 100).first()
-        val fetAutoKnee = repository.getBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_KNEE}",
-            true
-        ).first()
-        val fetKnee =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_KNEE}", 0).first()
-        val fetKneeMulti =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_KNEE_MULTI}", 0)
-                .first()
-        val fetAutoGain = repository.getBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_GAIN}",
-            true
-        ).first()
-        val fetGain =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_GAIN}", 0).first()
-        val fetAutoAttack = repository.getBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_ATTACK}",
-            true
-        ).first()
-        val fetAttack =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_ATTACK}", 20).first()
-        val fetMaxAttack =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_MAX_ATTACK}", 80)
-                .first()
-        val fetAutoRelease = repository.getBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_RELEASE}",
-            true
-        ).first()
-        val fetRelease =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_RELEASE}", 50)
-                .first()
-        val fetMaxRelease =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_MAX_RELEASE}", 100)
-                .first()
-        val fetCrest =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_CREST}", 100).first()
-        val fetAdapt =
-            repository.getIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_ADAPT}", 50).first()
-        val fetNoClip =
-            repository.getBooleanPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_NO_CLIP}", true)
-                .first()
-
-        val convolverCrossChannel =
-            repository.getIntPreference("${ViperParams.PARAM_HP_CONVOLVER_CROSS_CHANNEL}", 0)
-                .first()
 
         _uiState.update {
-            it.copy(
-                masterEnabled = masterEnabled,
+            state.copy(
                 fxType = fxType,
-                outputVolume = outputVolume,
-                channelPan = channelPan,
-                limiter = limiter,
-                agcEnabled = agcEnabled,
-                agcStrength = agcStrength,
-                agcMaxGain = agcMaxGain,
-                agcOutputThreshold = agcOutputThreshold,
-                fetEnabled = fetEnabled,
-                fetThreshold = fetThreshold,
-                fetRatio = fetRatio,
-                fetAutoKnee = fetAutoKnee,
-                fetKnee = fetKnee,
-                fetKneeMulti = fetKneeMulti,
-                fetAutoGain = fetAutoGain,
-                fetGain = fetGain,
-                fetAutoAttack = fetAutoAttack,
-                fetAttack = fetAttack,
-                fetMaxAttack = fetMaxAttack,
-                fetAutoRelease = fetAutoRelease,
-                fetRelease = fetRelease,
-                fetMaxRelease = fetMaxRelease,
-                fetCrest = fetCrest,
-                fetAdapt = fetAdapt,
-                fetNoClip = fetNoClip,
-                ddcEnabled = ddcEnabled,
-                ddcDevice = ddcDevice,
-                vseEnabled = vseEnabled,
-                vseStrength = vseStrength,
-                vseExciter = vseExciter,
-                eqEnabled = eqEnabled,
-                eqBandCount = eqBandCount,
-                eqPresetId = eqPresetId,
                 eqBands = eqBands,
-                eqBandsMap = eqBandsMap,
-                convolverEnabled = convolverEnabled,
-                convolverKernel = convolverKernel,
-                convolverCrossChannel = convolverCrossChannel,
-                fieldSurroundEnabled = fieldSurroundEnabled,
-                fieldSurroundWidening = fieldSurroundWidening,
-                fieldSurroundMidImage = fieldSurroundMidImage,
-                fieldSurroundDepth = fieldSurroundDepth,
-                diffSurroundEnabled = diffSurroundEnabled,
-                diffSurroundDelay = diffSurroundDelay,
-                vheEnabled = vheEnabled,
-                vheQuality = vheQuality,
-                reverbEnabled = reverbEnabled,
-                reverbRoomSize = reverbRoomSize,
-                reverbWidth = reverbWidth,
-                reverbDampening = reverbDampening,
-                reverbWet = reverbWet,
-                reverbDry = reverbDry,
-                dynamicSystemEnabled = dynamicSystemEnabled,
-                dynamicSystemDevice = dynamicSystemDevice,
-                dynamicSystemStrength = dynamicSystemStrength,
-                dsPresetId = dsPresetId,
-                dsXLow = dsXLow,
-                dsXHigh = dsXHigh,
-                dsYLow = dsYLow,
-                dsYHigh = dsYHigh,
-                dsSideGainLow = dsSideGainLow,
-                dsSideGainHigh = dsSideGainHigh,
-                tubeSimulatorEnabled = tubeSimulatorEnabled,
-                bassEnabled = bassEnabled,
-                bassMode = bassMode,
-                bassFrequency = bassFrequency,
-                bassGain = bassGain,
-                bassAntiPop = bassAntiPop,
-                bassMonoEnabled = bassMonoEnabled,
-                bassMonoMode = bassMonoMode,
-                bassMonoFrequency = bassMonoFrequency,
-                bassMonoGain = bassMonoGain,
-                bassMonoAntiPop = bassMonoAntiPop,
-                clarityEnabled = clarityEnabled,
-                clarityMode = clarityMode,
-                clarityGain = clarityGain,
-                cureEnabled = cureEnabled,
-                cureStrength = cureStrength,
-                analogxEnabled = analogxEnabled,
-                analogxMode = analogxMode
+                eqBandsMap = eqBandsMap
             )
         }
     }
 
     private suspend fun loadSpeakerPreferences() {
-        val spkMasterEnabled = repository.getBooleanPreference("spk_master_enable").first()
-        val spkDdcEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_DDC_ENABLE}").first()
-        val spkDdcDevice = repository.getStringPreference("spk_ddc_device", "").first()
-        val spkVseEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_ENABLE}")
-                .first()
-        val spkVseStrength =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_BARK}", 10)
-                .first()
-        val spkVseExciter = repository.getIntPreference(
-            "spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_BARK_RECONSTRUCT}",
-            0
-        ).first()
-        val spkFieldSurroundEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_ENABLE}")
-                .first()
-        val spkFieldSurroundWidening =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_WIDENING}", 0)
-                .first()
-        val spkFieldSurroundMidImage =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_MID_IMAGE}", 5)
-                .first()
-        val spkFieldSurroundDepth =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_DEPTH}", 0)
-                .first()
-        val spkDiffSurroundEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_ENABLE}")
-                .first()
-        val spkDiffSurroundDelay =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_DELAY}", 4)
-                .first()
-        val spkVheEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_HEADPHONE_SURROUND_ENABLE}")
-                .first()
-        val spkVheQuality = repository.getIntPreference(
-            "spk_${ViperParams.PARAM_SPK_HEADPHONE_SURROUND_STRENGTH}",
-            0
-        ).first()
-        val spkDynamicSystemEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_DYNAMIC_SYSTEM_ENABLE}")
-                .first()
-        val spkDynamicSystemDevice =
-            repository.getIntPreference("spk_dynamic_system_device", 0).first()
-        val spkDynamicSystemStrength =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_DYNAMIC_SYSTEM_STRENGTH}", 50)
-                .first()
-        val spkDsPresetId = repository.getIntPreference("spk_ds_preset_id", -1).first()
-            .let { if (it < 0) null else it.toLong() }
-        val spkDsXLow = repository.getIntPreference("spk_ds_x_low", 100).first()
-        val spkDsXHigh = repository.getIntPreference("spk_ds_x_high", 5600).first()
-        val spkDsYLow = repository.getIntPreference("spk_ds_y_low", 40).first()
-        val spkDsYHigh = repository.getIntPreference("spk_ds_y_high", 80).first()
-        val spkDsSideGainLow = repository.getIntPreference("spk_ds_side_gain_low", 50).first()
-        val spkDsSideGainHigh = repository.getIntPreference("spk_ds_side_gain_high", 50).first()
-        val spkTubeSimulatorEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_TUBE_SIMULATOR_ENABLE}")
-                .first()
-        val spkBassEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_ENABLE}").first()
-        val spkBassMode =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MODE}", 0).first()
-        val spkBassFrequency =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_FREQUENCY}", 55).first()
-        val spkBassGain =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_GAIN}", 0).first()
-        val spkBassAntiPop =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_ANTI_POP}", true)
-                .first()
-        val spkBassMonoEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_ENABLE}").first()
-        val spkBassMonoMode =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_MODE}", 0).first()
-        val spkBassMonoFrequency =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_FREQUENCY}", 55)
-                .first()
-        val spkBassMonoGain =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_GAIN}", 0).first()
-        val spkBassMonoAntiPop =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP}", true)
-                .first()
-        val spkClarityEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_CLARITY_ENABLE}").first()
-        val spkClarityMode =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_CLARITY_MODE}", 0).first()
-        val spkClarityGain =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_CLARITY_GAIN}", 1).first()
-        val spkCureEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_CURE_ENABLE}").first()
-        val spkCureStrength =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_CURE_STRENGTH}", 0).first()
-        val spkAnalogxEnabled =
-            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_ANALOGX_ENABLE}").first()
-        val spkAnalogxMode =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_ANALOGX_MODE}", 0).first()
-        val spkChannelPan =
-            repository.getIntPreference("spk_${ViperParams.PARAM_SPK_CHANNEL_PAN}", 0).first()
+        val state = loadEffectPrefs(repository, isSpk = true, state = _uiState.value)
 
-        val speakerOptEnabled =
-            repository.getBooleanPreference("speaker_optimization_enable").first()
-        val spkConvolverEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_SPK_CONVOLVER_ENABLE}").first()
-        val spkConvolverCrossChannel =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_CONVOLVER_CROSS_CHANNEL}", 0)
-                .first()
-        val spkConvolverKernel = repository.getStringPreference("spk_convolver_kernel", "").first()
-        val spkEqBandCount = repository.getIntPreference("spk_eq_band_count", 10).first()
-        val spkEqEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_SPK_EQ_ENABLE}").first()
-        val spkEqPresetId = repository.getIntPreference("spk_eq_preset_id", -1).first()
-            .let { if (it < 0) null else it.toLong() }
-        val rawSpkEqBands = repository.getStringPreference(
-            "${ViperParams.PARAM_SPK_EQ_BAND_LEVEL}",
-            "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;"
-        ).first()
+        val spkEqBandCount = state.spkEqBandCount
+        val rawSpkEqBands = state.spkEqBands
         val parsedSpkBandCount = rawSpkEqBands.split(";").count { it.isNotBlank() }
         val spkEqBands = if (parsedSpkBandCount != spkEqBandCount) {
             List(spkEqBandCount) { 0f }.joinToString(";") {
-                String.format(
-                    Locale.US,
-                    "%.1f",
-                    it
-                )
+                String.format(Locale.US, "%.1f", it)
             } + ";"
         } else {
             rawSpkEqBands
@@ -837,167 +466,11 @@ class MainViewModel @Inject constructor(
                 repository.getStringPreference("spk_eq_bands_$bc", defaultBands).first()
         }
         spkEqBandsMap[spkEqBandCount] = spkEqBands
-        val spkReverbEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_SPK_REVERB_ENABLE}").first()
-        val spkReverbRoomSize =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_REVERB_ROOM_SIZE}", 0).first()
-        val spkReverbWidth =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_REVERB_ROOM_WIDTH}", 0).first()
-        val spkReverbDampening =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_REVERB_ROOM_DAMPENING}", 0).first()
-        val spkReverbWet =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_REVERB_ROOM_WET_SIGNAL}", 0)
-                .first()
-        val spkReverbDry =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_REVERB_ROOM_DRY_SIGNAL}", 50)
-                .first()
-        val spkAgcEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_SPK_AGC_ENABLE}").first()
-        val spkAgcStrength =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_AGC_RATIO}", 0).first()
-        val spkAgcMaxGain =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_AGC_MAX_SCALER}", 3).first()
-        val spkAgcOutputThreshold =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_AGC_VOLUME}", 3).first()
-        val spkFetEnabled =
-            repository.getBooleanPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_ENABLE}")
-                .first()
-        val spkFetThreshold =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_THRESHOLD}", 100)
-                .first()
-        val spkFetRatio =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_RATIO}", 100)
-                .first()
-        val spkFetAutoKnee = repository.getBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_KNEE}",
-            true
-        ).first()
-        val spkFetKnee =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_KNEE}", 0).first()
-        val spkFetKneeMulti =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_KNEE_MULTI}", 0)
-                .first()
-        val spkFetAutoGain = repository.getBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_GAIN}",
-            true
-        ).first()
-        val spkFetGain =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_GAIN}", 0).first()
-        val spkFetAutoAttack = repository.getBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_ATTACK}",
-            true
-        ).first()
-        val spkFetAttack =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_ATTACK}", 20)
-                .first()
-        val spkFetMaxAttack =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_MAX_ATTACK}", 80)
-                .first()
-        val spkFetAutoRelease = repository.getBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_RELEASE}",
-            true
-        ).first()
-        val spkFetRelease =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_RELEASE}", 50)
-                .first()
-        val spkFetMaxRelease =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_MAX_RELEASE}", 100)
-                .first()
-        val spkFetCrest =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_CREST}", 100)
-                .first()
-        val spkFetAdapt =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_ADAPT}", 50).first()
-        val spkFetNoClip =
-            repository.getBooleanPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_NO_CLIP}", true)
-                .first()
-        val spkOutputVolume =
-            repository.getIntPreference("${ViperParams.PARAM_SPK_OUTPUT_VOLUME}", 11).first()
-        val spkLimiter = repository.getIntPreference("${ViperParams.PARAM_SPK_LIMITER}", 5).first()
 
         _uiState.update {
-            it.copy(
-                spkMasterEnabled = spkMasterEnabled,
-                spkDdcEnabled = spkDdcEnabled,
-                spkDdcDevice = spkDdcDevice,
-                spkVseEnabled = spkVseEnabled,
-                spkVseStrength = spkVseStrength,
-                spkVseExciter = spkVseExciter,
-                spkFieldSurroundEnabled = spkFieldSurroundEnabled,
-                spkFieldSurroundWidening = spkFieldSurroundWidening,
-                spkFieldSurroundMidImage = spkFieldSurroundMidImage,
-                spkFieldSurroundDepth = spkFieldSurroundDepth,
-                spkDiffSurroundEnabled = spkDiffSurroundEnabled,
-                spkDiffSurroundDelay = spkDiffSurroundDelay,
-                spkVheEnabled = spkVheEnabled,
-                spkVheQuality = spkVheQuality,
-                spkDynamicSystemEnabled = spkDynamicSystemEnabled,
-                spkDynamicSystemDevice = spkDynamicSystemDevice,
-                spkDynamicSystemStrength = spkDynamicSystemStrength,
-                spkDsPresetId = spkDsPresetId,
-                spkDsXLow = spkDsXLow,
-                spkDsXHigh = spkDsXHigh,
-                spkDsYLow = spkDsYLow,
-                spkDsYHigh = spkDsYHigh,
-                spkDsSideGainLow = spkDsSideGainLow,
-                spkDsSideGainHigh = spkDsSideGainHigh,
-                spkTubeSimulatorEnabled = spkTubeSimulatorEnabled,
-                spkBassEnabled = spkBassEnabled,
-                spkBassMode = spkBassMode,
-                spkBassFrequency = spkBassFrequency,
-                spkBassGain = spkBassGain,
-                spkBassAntiPop = spkBassAntiPop,
-                spkBassMonoEnabled = spkBassMonoEnabled,
-                spkBassMonoMode = spkBassMonoMode,
-                spkBassMonoFrequency = spkBassMonoFrequency,
-                spkBassMonoGain = spkBassMonoGain,
-                spkBassMonoAntiPop = spkBassMonoAntiPop,
-                spkClarityEnabled = spkClarityEnabled,
-                spkClarityMode = spkClarityMode,
-                spkClarityGain = spkClarityGain,
-                spkCureEnabled = spkCureEnabled,
-                spkCureStrength = spkCureStrength,
-                spkAnalogxEnabled = spkAnalogxEnabled,
-                spkAnalogxMode = spkAnalogxMode,
-                spkChannelPan = spkChannelPan,
-                speakerOptEnabled = speakerOptEnabled,
-                spkConvolverEnabled = spkConvolverEnabled,
-                spkConvolverKernel = spkConvolverKernel,
-                spkConvolverCrossChannel = spkConvolverCrossChannel,
-                spkEqBandCount = spkEqBandCount,
-                spkEqEnabled = spkEqEnabled,
-                spkEqPresetId = spkEqPresetId,
+            state.copy(
                 spkEqBands = spkEqBands,
-                spkEqBandsMap = spkEqBandsMap,
-                spkReverbEnabled = spkReverbEnabled,
-                spkReverbRoomSize = spkReverbRoomSize,
-                spkReverbWidth = spkReverbWidth,
-                spkReverbDampening = spkReverbDampening,
-                spkReverbWet = spkReverbWet,
-                spkReverbDry = spkReverbDry,
-                spkAgcEnabled = spkAgcEnabled,
-                spkAgcStrength = spkAgcStrength,
-                spkAgcMaxGain = spkAgcMaxGain,
-                spkAgcOutputThreshold = spkAgcOutputThreshold,
-                spkFetEnabled = spkFetEnabled,
-                spkFetThreshold = spkFetThreshold,
-                spkFetRatio = spkFetRatio,
-                spkFetAutoKnee = spkFetAutoKnee,
-                spkFetKnee = spkFetKnee,
-                spkFetKneeMulti = spkFetKneeMulti,
-                spkFetAutoGain = spkFetAutoGain,
-                spkFetGain = spkFetGain,
-                spkFetAutoAttack = spkFetAutoAttack,
-                spkFetAttack = spkFetAttack,
-                spkFetMaxAttack = spkFetMaxAttack,
-                spkFetAutoRelease = spkFetAutoRelease,
-                spkFetRelease = spkFetRelease,
-                spkFetMaxRelease = spkFetMaxRelease,
-                spkFetCrest = spkFetCrest,
-                spkFetAdapt = spkFetAdapt,
-                spkFetNoClip = spkFetNoClip,
-                spkOutputVolume = spkOutputVolume,
-                spkLimiter = spkLimiter
+                spkEqBandsMap = spkEqBandsMap
             )
         }
     }
@@ -1140,7 +613,7 @@ class MainViewModel @Inject constructor(
         FileLogger.i("ViewModel", "Master: ${if (enabled) "ON" else "OFF"} (speaker)")
         _uiState.update { it.copy(spkMasterEnabled = enabled) }
         viewModelScope.launch {
-            repository.setBooleanPreference("spk_master_enable", enabled)
+            repository.setBooleanPreference("spk_${ViperRepository.PREF_MASTER_ENABLE}", enabled)
         }
         if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) {
             viperService?.setEffectEnabled(enabled)
@@ -1474,7 +947,12 @@ class MainViewModel @Inject constructor(
     fun setDdcDevice(device: String) {
         FileLogger.i("ViewModel", "DDC selected: $device")
         _uiState.update { it.copy(ddcDevice = device) }
-        viewModelScope.launch { repository.setStringPreference("ddc_device", device) }
+        viewModelScope.launch {
+            repository.setStringPreference(
+                ViperRepository.PREF_DDC_DEVICE,
+                device
+            )
+        }
         if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) {
             if (device.isEmpty()) {
                 dispatchInt(ViperParams.PARAM_HP_DDC_ENABLE, 0)
@@ -1568,7 +1046,7 @@ class MainViewModel @Inject constructor(
             s.copy(eqPresetId = presetId, eqBands = bands, eqBandsMap = updatedMap)
         }
         viewModelScope.launch {
-            repository.setIntPreference("eq_preset_id", presetId.toInt())
+            repository.setIntPreference(ViperRepository.PREF_EQ_PRESET_ID, presetId.toInt())
             repository.setStringPreference("${ViperParams.PARAM_HP_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("eq_bands_$bandCount", bands)
         }
@@ -1607,7 +1085,7 @@ class MainViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            repository.setIntPreference("eq_band_count", count)
+            repository.setIntPreference("${ViperParams.PARAM_HP_EQ_BAND_COUNT}", count)
             repository.setStringPreference("${ViperParams.PARAM_HP_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("eq_bands_$oldCount", currentState.eqBands)
             repository.setStringPreference("eq_bands_$count", bands)
@@ -1629,7 +1107,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val id = repository.saveEqPreset(preset)
             _uiState.update { it.copy(eqPresetId = id) }
-            repository.setIntPreference("eq_preset_id", id.toInt())
+            repository.setIntPreference(ViperRepository.PREF_EQ_PRESET_ID, id.toInt())
         }
     }
 
@@ -1638,7 +1116,7 @@ class MainViewModel @Inject constructor(
             repository.deleteEqPresetById(presetId)
             if (_uiState.value.eqPresetId == presetId) {
                 _uiState.update { it.copy(eqPresetId = null) }
-                repository.setIntPreference("eq_preset_id", -1)
+                repository.setIntPreference(ViperRepository.PREF_EQ_PRESET_ID, -1)
             }
         }
     }
@@ -1649,7 +1127,7 @@ class MainViewModel @Inject constructor(
             List(bandCount) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
         setEqBands(flatBands)
         _uiState.update { it.copy(eqPresetId = null) }
-        viewModelScope.launch { repository.setIntPreference("eq_preset_id", -1) }
+        viewModelScope.launch { repository.setIntPreference(ViperRepository.PREF_EQ_PRESET_ID, -1) }
     }
 
     fun setConvolverEnabled(enabled: Boolean) {
@@ -1673,7 +1151,12 @@ class MainViewModel @Inject constructor(
     fun setConvolverKernel(kernel: String) {
         FileLogger.i("ViewModel", "Convolver kernel selected: $kernel")
         _uiState.update { it.copy(convolverKernel = kernel) }
-        viewModelScope.launch { repository.setStringPreference("convolver_kernel", kernel) }
+        viewModelScope.launch {
+            repository.setStringPreference(
+                "${ViperParams.PARAM_HP_CONVOLVER_SET_KERNEL}",
+                kernel
+            )
+        }
         if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) {
             if (kernel.isEmpty()) {
                 dispatchInt(ViperParams.PARAM_HP_CONVOLVER_ENABLE, 0)
@@ -1977,13 +1460,34 @@ class MainViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            repository.setIntPreference("ds_preset_id", presetId.toInt())
-            repository.setIntPreference("ds_x_low", preset.xLow)
-            repository.setIntPreference("ds_x_high", preset.xHigh)
-            repository.setIntPreference("ds_y_low", preset.yLow)
-            repository.setIntPreference("ds_y_high", preset.yHigh)
-            repository.setIntPreference("ds_side_gain_low", preset.sideGainLow)
-            repository.setIntPreference("ds_side_gain_high", preset.sideGainHigh)
+            repository.setIntPreference(
+                ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID,
+                presetId.toInt()
+            )
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_low",
+                preset.xLow
+            )
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_high",
+                preset.xHigh
+            )
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_low",
+                preset.yLow
+            )
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_high",
+                preset.yHigh
+            )
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_low",
+                preset.sideGainLow
+            )
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_high",
+                preset.sideGainHigh
+            )
         }
         hpDispatchDynamicSystem()
     }
@@ -1991,8 +1495,11 @@ class MainViewModel @Inject constructor(
     fun setDsXLow(v: Int) {
         _uiState.update { it.copy(dsXLow = v, dsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("ds_x_low", v)
-            repository.setIntPreference("ds_preset_id", -1)
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_low",
+                v
+            )
+            repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, -1)
         }
         hpDispatchDynamicSystem()
     }
@@ -2000,8 +1507,11 @@ class MainViewModel @Inject constructor(
     fun setDsXHigh(v: Int) {
         _uiState.update { it.copy(dsXHigh = v, dsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("ds_x_high", v)
-            repository.setIntPreference("ds_preset_id", -1)
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_high",
+                v
+            )
+            repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, -1)
         }
         hpDispatchDynamicSystem()
     }
@@ -2009,8 +1519,11 @@ class MainViewModel @Inject constructor(
     fun setDsYLow(v: Int) {
         _uiState.update { it.copy(dsYLow = v, dsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("ds_y_low", v)
-            repository.setIntPreference("ds_preset_id", -1)
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_low",
+                v
+            )
+            repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, -1)
         }
         hpDispatchDynamicSystem()
     }
@@ -2018,8 +1531,11 @@ class MainViewModel @Inject constructor(
     fun setDsYHigh(v: Int) {
         _uiState.update { it.copy(dsYHigh = v, dsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("ds_y_high", v)
-            repository.setIntPreference("ds_preset_id", -1)
+            repository.setIntPreference(
+                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_high",
+                v
+            )
+            repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, -1)
         }
         hpDispatchDynamicSystem()
     }
@@ -2027,8 +1543,8 @@ class MainViewModel @Inject constructor(
     fun setDsSideGainLow(v: Int) {
         _uiState.update { it.copy(dsSideGainLow = v, dsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("ds_side_gain_low", v)
-            repository.setIntPreference("ds_preset_id", -1)
+            repository.setIntPreference("${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_low", v)
+            repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, -1)
         }
         hpDispatchDynamicSystem()
     }
@@ -2036,8 +1552,8 @@ class MainViewModel @Inject constructor(
     fun setDsSideGainHigh(v: Int) {
         _uiState.update { it.copy(dsSideGainHigh = v, dsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("ds_side_gain_high", v)
-            repository.setIntPreference("ds_preset_id", -1)
+            repository.setIntPreference("${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_high", v)
+            repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, -1)
         }
         hpDispatchDynamicSystem()
     }
@@ -2053,7 +1569,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val id = repository.saveDsPreset(preset)
             _uiState.update { it.copy(dsPresetId = id) }
-            repository.setIntPreference("ds_preset_id", id.toInt())
+            repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, id.toInt())
         }
     }
 
@@ -2062,7 +1578,7 @@ class MainViewModel @Inject constructor(
             repository.deleteDsPresetById(presetId)
             if (_uiState.value.dsPresetId == presetId) {
                 _uiState.update { it.copy(dsPresetId = null) }
-                repository.setIntPreference("ds_preset_id", -1)
+                repository.setIntPreference(ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID, -1)
             }
         }
     }
@@ -2076,7 +1592,12 @@ class MainViewModel @Inject constructor(
                 dsPresetId = null
             )
         }
-        viewModelScope.launch { repository.setIntPreference("ds_preset_id", -1) }
+        viewModelScope.launch {
+            repository.setIntPreference(
+                ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID,
+                -1
+            )
+        }
         hpDispatchDynamicSystem()
     }
 
@@ -2323,7 +1844,7 @@ class MainViewModel @Inject constructor(
         _uiState.update { it.copy(speakerOptEnabled = enabled) }
         viewModelScope.launch {
             repository.setBooleanPreference(
-                "speaker_optimization_enable",
+                "spk_${ViperParams.PARAM_SPK_SPEAKER_CORRECTION_ENABLE}",
                 enabled
             )
         }
@@ -2351,7 +1872,12 @@ class MainViewModel @Inject constructor(
     fun setSpkConvolverKernel(kernel: String) {
         FileLogger.i("ViewModel", "[Spk] Convolver kernel selected: $kernel")
         _uiState.update { it.copy(spkConvolverKernel = kernel) }
-        viewModelScope.launch { repository.setStringPreference("spk_convolver_kernel", kernel) }
+        viewModelScope.launch {
+            repository.setStringPreference(
+                "spk_${ViperParams.PARAM_HP_CONVOLVER_SET_KERNEL}",
+                kernel
+            )
+        }
         if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) {
             if (kernel.isEmpty()) {
                 dispatchInt(ViperParams.PARAM_SPK_CONVOLVER_ENABLE, 0)
@@ -2397,7 +1923,10 @@ class MainViewModel @Inject constructor(
             s.copy(spkEqPresetId = presetId, spkEqBands = bands, spkEqBandsMap = updatedMap)
         }
         viewModelScope.launch {
-            repository.setIntPreference("spk_eq_preset_id", presetId.toInt())
+            repository.setIntPreference(
+                "spk_${ViperRepository.PREF_EQ_PRESET_ID}",
+                presetId.toInt()
+            )
             repository.setStringPreference("${ViperParams.PARAM_SPK_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("spk_eq_bands_$bandCount", bands)
         }
@@ -2436,7 +1965,7 @@ class MainViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            repository.setIntPreference("spk_eq_band_count", count)
+            repository.setIntPreference("spk_${ViperParams.PARAM_HP_EQ_BAND_COUNT}", count)
             repository.setStringPreference("${ViperParams.PARAM_SPK_EQ_BAND_LEVEL}", bands)
             repository.setStringPreference("spk_eq_bands_$oldCount", currentState.spkEqBands)
             repository.setStringPreference("spk_eq_bands_$count", bands)
@@ -2459,7 +1988,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val id = repository.saveEqPreset(preset)
             _uiState.update { it.copy(spkEqPresetId = id) }
-            repository.setIntPreference("spk_eq_preset_id", id.toInt())
+            repository.setIntPreference("spk_${ViperRepository.PREF_EQ_PRESET_ID}", id.toInt())
         }
     }
 
@@ -2468,7 +1997,7 @@ class MainViewModel @Inject constructor(
             repository.deleteEqPresetById(presetId)
             if (_uiState.value.spkEqPresetId == presetId) {
                 _uiState.update { it.copy(spkEqPresetId = null) }
-                repository.setIntPreference("spk_eq_preset_id", -1)
+                repository.setIntPreference("spk_${ViperRepository.PREF_EQ_PRESET_ID}", -1)
             }
         }
     }
@@ -2479,7 +2008,12 @@ class MainViewModel @Inject constructor(
             List(bandCount) { 0f }.joinToString(";") { String.format(Locale.US, "%.1f", it) } + ";"
         setSpkEqBands(flatBands)
         _uiState.update { it.copy(spkEqPresetId = null) }
-        viewModelScope.launch { repository.setIntPreference("spk_eq_preset_id", -1) }
+        viewModelScope.launch {
+            repository.setIntPreference(
+                "spk_${ViperRepository.PREF_EQ_PRESET_ID}",
+                -1
+            )
+        }
     }
 
     fun setSpkReverbEnabled(enabled: Boolean) {
@@ -2872,7 +2406,12 @@ class MainViewModel @Inject constructor(
     fun setSpkDdcDevice(device: String) {
         FileLogger.i("ViewModel", "[Spk] DDC selected: $device")
         _uiState.update { it.copy(spkDdcDevice = device) }
-        viewModelScope.launch { repository.setStringPreference("spk_ddc_device", device) }
+        viewModelScope.launch {
+            repository.setStringPreference(
+                "spk_${ViperRepository.PREF_DDC_DEVICE}",
+                device
+            )
+        }
         if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) {
             if (device.isEmpty()) {
                 dispatchInt(ViperParams.PARAM_SPK_DDC_ENABLE, 0)
@@ -3147,13 +2686,34 @@ class MainViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            repository.setIntPreference("spk_ds_preset_id", presetId.toInt())
-            repository.setIntPreference("spk_ds_x_low", preset.xLow)
-            repository.setIntPreference("spk_ds_x_high", preset.xHigh)
-            repository.setIntPreference("spk_ds_y_low", preset.yLow)
-            repository.setIntPreference("spk_ds_y_high", preset.yHigh)
-            repository.setIntPreference("spk_ds_side_gain_low", preset.sideGainLow)
-            repository.setIntPreference("spk_ds_side_gain_high", preset.sideGainHigh)
+            repository.setIntPreference(
+                "spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}",
+                presetId.toInt()
+            )
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_low",
+                preset.xLow
+            )
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_high",
+                preset.xHigh
+            )
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_low",
+                preset.yLow
+            )
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_high",
+                preset.yHigh
+            )
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_low",
+                preset.sideGainLow
+            )
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_high",
+                preset.sideGainHigh
+            )
         }
         spkDispatchDynamicSystem()
     }
@@ -3161,8 +2721,11 @@ class MainViewModel @Inject constructor(
     fun setSpkDsXLow(v: Int) {
         _uiState.update { it.copy(spkDsXLow = v, spkDsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("spk_ds_x_low", v)
-            repository.setIntPreference("spk_ds_preset_id", -1)
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_low",
+                v
+            )
+            repository.setIntPreference("spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}", -1)
         }
         spkDispatchDynamicSystem()
     }
@@ -3170,8 +2733,11 @@ class MainViewModel @Inject constructor(
     fun setSpkDsXHigh(v: Int) {
         _uiState.update { it.copy(spkDsXHigh = v, spkDsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("spk_ds_x_high", v)
-            repository.setIntPreference("spk_ds_preset_id", -1)
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_X_COEFFICIENTS}_high",
+                v
+            )
+            repository.setIntPreference("spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}", -1)
         }
         spkDispatchDynamicSystem()
     }
@@ -3179,8 +2745,11 @@ class MainViewModel @Inject constructor(
     fun setSpkDsYLow(v: Int) {
         _uiState.update { it.copy(spkDsYLow = v, spkDsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("spk_ds_y_low", v)
-            repository.setIntPreference("spk_ds_preset_id", -1)
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_low",
+                v
+            )
+            repository.setIntPreference("spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}", -1)
         }
         spkDispatchDynamicSystem()
     }
@@ -3188,8 +2757,11 @@ class MainViewModel @Inject constructor(
     fun setSpkDsYHigh(v: Int) {
         _uiState.update { it.copy(spkDsYHigh = v, spkDsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("spk_ds_y_high", v)
-            repository.setIntPreference("spk_ds_preset_id", -1)
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_Y_COEFFICIENTS}_high",
+                v
+            )
+            repository.setIntPreference("spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}", -1)
         }
         spkDispatchDynamicSystem()
     }
@@ -3197,8 +2769,11 @@ class MainViewModel @Inject constructor(
     fun setSpkDsSideGainLow(v: Int) {
         _uiState.update { it.copy(spkDsSideGainLow = v, spkDsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("spk_ds_side_gain_low", v)
-            repository.setIntPreference("spk_ds_preset_id", -1)
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_low",
+                v
+            )
+            repository.setIntPreference("spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}", -1)
         }
         spkDispatchDynamicSystem()
     }
@@ -3206,8 +2781,11 @@ class MainViewModel @Inject constructor(
     fun setSpkDsSideGainHigh(v: Int) {
         _uiState.update { it.copy(spkDsSideGainHigh = v, spkDsPresetId = null) }
         viewModelScope.launch {
-            repository.setIntPreference("spk_ds_side_gain_high", v)
-            repository.setIntPreference("spk_ds_preset_id", -1)
+            repository.setIntPreference(
+                "spk_${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_SIDE_GAIN}_high",
+                v
+            )
+            repository.setIntPreference("spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}", -1)
         }
         spkDispatchDynamicSystem()
     }
@@ -3223,7 +2801,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val id = repository.saveDsPreset(preset)
             _uiState.update { it.copy(spkDsPresetId = id) }
-            repository.setIntPreference("spk_ds_preset_id", id.toInt())
+            repository.setIntPreference(
+                "spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}",
+                id.toInt()
+            )
         }
     }
 
@@ -3232,7 +2813,7 @@ class MainViewModel @Inject constructor(
             repository.deleteDsPresetById(presetId)
             if (_uiState.value.spkDsPresetId == presetId) {
                 _uiState.update { it.copy(spkDsPresetId = null) }
-                repository.setIntPreference("spk_ds_preset_id", -1)
+                repository.setIntPreference("spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}", -1)
             }
         }
     }
@@ -3246,7 +2827,12 @@ class MainViewModel @Inject constructor(
                 spkDsPresetId = null
             )
         }
-        viewModelScope.launch { repository.setIntPreference("spk_ds_preset_id", -1) }
+        viewModelScope.launch {
+            repository.setIntPreference(
+                "spk_${ViperRepository.PERF_DYNAMIC_SYS_PRESET_ID}",
+                -1
+            )
+        }
         spkDispatchDynamicSystem()
     }
 
@@ -3599,11 +3185,21 @@ class MainViewModel @Inject constructor(
             val state = _uiState.value
             if (state.ddcDevice == name) {
                 _uiState.update { it.copy(ddcDevice = "") }
-                viewModelScope.launch { repository.setStringPreference("ddc_device", "") }
+                viewModelScope.launch {
+                    repository.setStringPreference(
+                        ViperRepository.PREF_DDC_DEVICE,
+                        ""
+                    )
+                }
             }
             if (state.spkDdcDevice == name) {
                 _uiState.update { it.copy(spkDdcDevice = "") }
-                viewModelScope.launch { repository.setStringPreference("spk_ddc_device", "") }
+                viewModelScope.launch {
+                    repository.setStringPreference(
+                        "spk_${ViperRepository.PREF_DDC_DEVICE}",
+                        ""
+                    )
+                }
             }
             refreshFileLists()
             true
@@ -3621,11 +3217,21 @@ class MainViewModel @Inject constructor(
             val state = _uiState.value
             if (state.convolverKernel == fileName) {
                 _uiState.update { it.copy(convolverKernel = "") }
-                viewModelScope.launch { repository.setStringPreference("convolver_kernel", "") }
+                viewModelScope.launch {
+                    repository.setStringPreference(
+                        "${ViperParams.PARAM_HP_CONVOLVER_SET_KERNEL}",
+                        ""
+                    )
+                }
             }
             if (state.spkConvolverKernel == fileName) {
                 _uiState.update { it.copy(spkConvolverKernel = "") }
-                viewModelScope.launch { repository.setStringPreference("spk_convolver_kernel", "") }
+                viewModelScope.launch {
+                    repository.setStringPreference(
+                        "spk_${ViperParams.PARAM_HP_CONVOLVER_SET_KERNEL}",
+                        ""
+                    )
+                }
             }
             refreshFileLists()
             true
@@ -3871,783 +3477,28 @@ class MainViewModel @Inject constructor(
 
     private suspend fun persistCurrentState() {
         val s = _uiState.value
-        repository.setBooleanPreference(ViperRepository.PREF_MASTER_ENABLE, s.masterEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_HP_OUTPUT_VOLUME}", s.outputVolume)
-        repository.setIntPreference("${ViperParams.PARAM_HP_CHANNEL_PAN}", s.channelPan)
-        repository.setIntPreference("${ViperParams.PARAM_HP_LIMITER}", s.limiter)
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_AGC_ENABLE}", s.agcEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_HP_AGC_RATIO}", s.agcStrength)
-        repository.setIntPreference("${ViperParams.PARAM_HP_AGC_MAX_SCALER}", s.agcMaxGain)
-        repository.setIntPreference("${ViperParams.PARAM_HP_AGC_VOLUME}", s.agcOutputThreshold)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_ENABLE}",
-            s.fetEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_THRESHOLD}",
-            s.fetThreshold
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_RATIO}", s.fetRatio)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_KNEE}",
-            s.fetAutoKnee
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_KNEE}", s.fetKnee)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_KNEE_MULTI}",
-            s.fetKneeMulti
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_GAIN}",
-            s.fetAutoGain
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_GAIN}", s.fetGain)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_ATTACK}",
-            s.fetAutoAttack
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_ATTACK}", s.fetAttack)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_MAX_ATTACK}",
-            s.fetMaxAttack
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_RELEASE}",
-            s.fetAutoRelease
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_RELEASE}", s.fetRelease)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_MAX_RELEASE}",
-            s.fetMaxRelease
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_CREST}", s.fetCrest)
-        repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_ADAPT}", s.fetAdapt)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_FET_COMPRESSOR_NO_CLIP}",
-            s.fetNoClip
-        )
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_DDC_ENABLE}", s.ddcEnabled)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_ENABLE}",
-            s.vseEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_BARK}",
-            s.vseStrength
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_BARK_RECONSTRUCT}",
-            s.vseExciter
-        )
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_EQ_ENABLE}", s.eqEnabled)
-        repository.setIntPreference("eq_band_count", s.eqBandCount)
-        repository.setStringPreference("${ViperParams.PARAM_HP_EQ_BAND_LEVEL}", s.eqBands)
+        saveEffectPrefs(repository, s, isSpk = false)
         for ((bc, bands) in s.eqBandsMap) {
             repository.setStringPreference("eq_bands_$bc", bands)
         }
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_CONVOLVER_ENABLE}",
-            s.convolverEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_CONVOLVER_CROSS_CHANNEL}",
-            s.convolverCrossChannel
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_FIELD_SURROUND_ENABLE}",
-            s.fieldSurroundEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_FIELD_SURROUND_WIDENING}",
-            s.fieldSurroundWidening
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_FIELD_SURROUND_MID_IMAGE}",
-            s.fieldSurroundMidImage
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_FIELD_SURROUND_DEPTH}",
-            s.fieldSurroundDepth
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_DIFF_SURROUND_ENABLE}",
-            s.diffSurroundEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_DIFF_SURROUND_DELAY}",
-            s.diffSurroundDelay
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_HEADPHONE_SURROUND_ENABLE}",
-            s.vheEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_HEADPHONE_SURROUND_STRENGTH}",
-            s.vheQuality
-        )
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_REVERB_ENABLE}", s.reverbEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_SIZE}", s.reverbRoomSize)
-        repository.setIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_WIDTH}", s.reverbWidth)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_REVERB_ROOM_DAMPENING}",
-            s.reverbDampening
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_WET_SIGNAL}", s.reverbWet)
-        repository.setIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_DRY_SIGNAL}", s.reverbDry)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_ENABLE}",
-            s.dynamicSystemEnabled
-        )
-        repository.setIntPreference("dynamic_system_device", s.dynamicSystemDevice)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_STRENGTH}",
-            s.dynamicSystemStrength
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_TUBE_SIMULATOR_ENABLE}",
-            s.tubeSimulatorEnabled
-        )
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_BASS_ENABLE}", s.bassEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_HP_BASS_MODE}", s.bassMode)
-        repository.setIntPreference("${ViperParams.PARAM_HP_BASS_FREQUENCY}", s.bassFrequency)
-        repository.setIntPreference("${ViperParams.PARAM_HP_BASS_GAIN}", s.bassGain)
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_BASS_ANTI_POP}", s.bassAntiPop)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_BASS_MONO_ENABLE}",
-            s.bassMonoEnabled
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_BASS_MONO_MODE}", s.bassMonoMode)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_HP_BASS_MONO_FREQUENCY}",
-            s.bassMonoFrequency
-        )
-        repository.setIntPreference("${ViperParams.PARAM_HP_BASS_MONO_GAIN}", s.bassMonoGain)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_HP_BASS_MONO_ANTI_POP}",
-            s.bassMonoAntiPop
-        )
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_CLARITY_ENABLE}", s.clarityEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_HP_CLARITY_MODE}", s.clarityMode)
-        repository.setIntPreference("${ViperParams.PARAM_HP_CLARITY_GAIN}", s.clarityGain)
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_CURE_ENABLE}", s.cureEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_HP_CURE_STRENGTH}", s.cureStrength)
-        repository.setBooleanPreference("${ViperParams.PARAM_HP_ANALOGX_ENABLE}", s.analogxEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_HP_ANALOGX_MODE}", s.analogxMode)
-        repository.setBooleanPreference("spk_master_enable", s.spkMasterEnabled)
-        repository.setBooleanPreference("spk_${ViperParams.PARAM_SPK_DDC_ENABLE}", s.spkDdcEnabled)
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_ENABLE}",
-            s.spkVseEnabled
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_BARK}",
-            s.spkVseStrength
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_BARK_RECONSTRUCT}",
-            s.spkVseExciter
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_ENABLE}",
-            s.spkFieldSurroundEnabled
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_WIDENING}",
-            s.spkFieldSurroundWidening
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_MID_IMAGE}",
-            s.spkFieldSurroundMidImage
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_DEPTH}",
-            s.spkFieldSurroundDepth
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_ENABLE}",
-            s.spkDiffSurroundEnabled
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_DELAY}",
-            s.spkDiffSurroundDelay
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_HEADPHONE_SURROUND_ENABLE}",
-            s.spkVheEnabled
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_HEADPHONE_SURROUND_STRENGTH}",
-            s.spkVheQuality
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_DYNAMIC_SYSTEM_ENABLE}",
-            s.spkDynamicSystemEnabled
-        )
-        repository.setIntPreference("spk_dynamic_system_device", s.spkDynamicSystemDevice)
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_DYNAMIC_SYSTEM_STRENGTH}",
-            s.spkDynamicSystemStrength
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_TUBE_SIMULATOR_ENABLE}",
-            s.spkTubeSimulatorEnabled
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_ENABLE}",
-            s.spkBassEnabled
-        )
-        repository.setIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MODE}", s.spkBassMode)
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_FREQUENCY}",
-            s.spkBassFrequency
-        )
-        repository.setIntPreference("spk_${ViperParams.PARAM_SPK_BASS_GAIN}", s.spkBassGain)
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_ANTI_POP}",
-            s.spkBassAntiPop
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_MONO_ENABLE}",
-            s.spkBassMonoEnabled
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_MONO_MODE}",
-            s.spkBassMonoMode
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_MONO_FREQUENCY}",
-            s.spkBassMonoFrequency
-        )
-        repository.setIntPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_MONO_GAIN}",
-            s.spkBassMonoGain
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP}",
-            s.spkBassMonoAntiPop
-        )
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_CLARITY_ENABLE}",
-            s.spkClarityEnabled
-        )
-        repository.setIntPreference("spk_${ViperParams.PARAM_SPK_CLARITY_MODE}", s.spkClarityMode)
-        repository.setIntPreference("spk_${ViperParams.PARAM_SPK_CLARITY_GAIN}", s.spkClarityGain)
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_CURE_ENABLE}",
-            s.spkCureEnabled
-        )
-        repository.setIntPreference("spk_${ViperParams.PARAM_SPK_CURE_STRENGTH}", s.spkCureStrength)
-        repository.setBooleanPreference(
-            "spk_${ViperParams.PARAM_SPK_ANALOGX_ENABLE}",
-            s.spkAnalogxEnabled
-        )
-        repository.setIntPreference("spk_${ViperParams.PARAM_SPK_ANALOGX_MODE}", s.spkAnalogxMode)
-        repository.setIntPreference("spk_${ViperParams.PARAM_SPK_CHANNEL_PAN}", s.spkChannelPan)
-        repository.setBooleanPreference("speaker_optimization_enable", s.speakerOptEnabled)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_CONVOLVER_ENABLE}",
-            s.spkConvolverEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_CONVOLVER_CROSS_CHANNEL}",
-            s.spkConvolverCrossChannel
-        )
-        repository.setIntPreference("spk_eq_band_count", s.spkEqBandCount)
-        repository.setBooleanPreference("${ViperParams.PARAM_SPK_EQ_ENABLE}", s.spkEqEnabled)
-        repository.setStringPreference("${ViperParams.PARAM_SPK_EQ_BAND_LEVEL}", s.spkEqBands)
+        saveEffectPrefs(repository, s, isSpk = true)
         for ((bc, bands) in s.spkEqBandsMap) {
             repository.setStringPreference("spk_eq_bands_$bc", bands)
         }
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_REVERB_ENABLE}",
-            s.spkReverbEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_REVERB_ROOM_SIZE}",
-            s.spkReverbRoomSize
-        )
-        repository.setIntPreference("${ViperParams.PARAM_SPK_REVERB_ROOM_WIDTH}", s.spkReverbWidth)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_REVERB_ROOM_DAMPENING}",
-            s.spkReverbDampening
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_REVERB_ROOM_WET_SIGNAL}",
-            s.spkReverbWet
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_REVERB_ROOM_DRY_SIGNAL}",
-            s.spkReverbDry
-        )
-        repository.setBooleanPreference("${ViperParams.PARAM_SPK_AGC_ENABLE}", s.spkAgcEnabled)
-        repository.setIntPreference("${ViperParams.PARAM_SPK_AGC_RATIO}", s.spkAgcStrength)
-        repository.setIntPreference("${ViperParams.PARAM_SPK_AGC_MAX_SCALER}", s.spkAgcMaxGain)
-        repository.setIntPreference("${ViperParams.PARAM_SPK_AGC_VOLUME}", s.spkAgcOutputThreshold)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_ENABLE}",
-            s.spkFetEnabled
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_THRESHOLD}",
-            s.spkFetThreshold
-        )
-        repository.setIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_RATIO}", s.spkFetRatio)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_KNEE}",
-            s.spkFetAutoKnee
-        )
-        repository.setIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_KNEE}", s.spkFetKnee)
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_KNEE_MULTI}",
-            s.spkFetKneeMulti
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_GAIN}",
-            s.spkFetAutoGain
-        )
-        repository.setIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_GAIN}", s.spkFetGain)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_ATTACK}",
-            s.spkFetAutoAttack
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_ATTACK}",
-            s.spkFetAttack
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_MAX_ATTACK}",
-            s.spkFetMaxAttack
-        )
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_RELEASE}",
-            s.spkFetAutoRelease
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_RELEASE}",
-            s.spkFetRelease
-        )
-        repository.setIntPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_MAX_RELEASE}",
-            s.spkFetMaxRelease
-        )
-        repository.setIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_CREST}", s.spkFetCrest)
-        repository.setIntPreference("${ViperParams.PARAM_SPK_FET_COMPRESSOR_ADAPT}", s.spkFetAdapt)
-        repository.setBooleanPreference(
-            "${ViperParams.PARAM_SPK_FET_COMPRESSOR_NO_CLIP}",
-            s.spkFetNoClip
-        )
-        repository.setIntPreference("${ViperParams.PARAM_SPK_OUTPUT_VOLUME}", s.spkOutputVolume)
-        repository.setIntPreference("${ViperParams.PARAM_SPK_LIMITER}", s.spkLimiter)
     }
 
     private suspend fun persistStateForMode(fxType: Int) {
         val s = _uiState.value
-        if (fxType == ViperParams.FX_TYPE_HEADPHONE) {
-            repository.setBooleanPreference(ViperRepository.PREF_MASTER_ENABLE, s.masterEnabled)
-            repository.setIntPreference("${ViperParams.PARAM_HP_OUTPUT_VOLUME}", s.outputVolume)
-            repository.setIntPreference("${ViperParams.PARAM_HP_CHANNEL_PAN}", s.channelPan)
-            repository.setIntPreference("${ViperParams.PARAM_HP_LIMITER}", s.limiter)
-            repository.setBooleanPreference("${ViperParams.PARAM_HP_AGC_ENABLE}", s.agcEnabled)
-            repository.setIntPreference("${ViperParams.PARAM_HP_AGC_RATIO}", s.agcStrength)
-            repository.setIntPreference("${ViperParams.PARAM_HP_AGC_MAX_SCALER}", s.agcMaxGain)
-            repository.setIntPreference("${ViperParams.PARAM_HP_AGC_VOLUME}", s.agcOutputThreshold)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_ENABLE}",
-                s.fetEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_THRESHOLD}",
-                s.fetThreshold
-            )
-            repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_RATIO}", s.fetRatio)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_KNEE}",
-                s.fetAutoKnee
-            )
-            repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_KNEE}", s.fetKnee)
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_KNEE_MULTI}",
-                s.fetKneeMulti
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_GAIN}",
-                s.fetAutoGain
-            )
-            repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_GAIN}", s.fetGain)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_ATTACK}",
-                s.fetAutoAttack
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_ATTACK}",
-                s.fetAttack
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_MAX_ATTACK}",
-                s.fetMaxAttack
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_AUTO_RELEASE}",
-                s.fetAutoRelease
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_RELEASE}",
-                s.fetRelease
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_MAX_RELEASE}",
-                s.fetMaxRelease
-            )
-            repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_CREST}", s.fetCrest)
-            repository.setIntPreference("${ViperParams.PARAM_HP_FET_COMPRESSOR_ADAPT}", s.fetAdapt)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_FET_COMPRESSOR_NO_CLIP}",
-                s.fetNoClip
-            )
-            repository.setBooleanPreference("${ViperParams.PARAM_HP_DDC_ENABLE}", s.ddcEnabled)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_ENABLE}",
-                s.vseEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_BARK}",
-                s.vseStrength
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_SPECTRUM_EXTENSION_BARK_RECONSTRUCT}",
-                s.vseExciter
-            )
-            repository.setBooleanPreference("${ViperParams.PARAM_HP_EQ_ENABLE}", s.eqEnabled)
-            repository.setIntPreference("eq_band_count", s.eqBandCount)
-            repository.setStringPreference("${ViperParams.PARAM_HP_EQ_BAND_LEVEL}", s.eqBands)
-            for ((bc, bands) in s.eqBandsMap) {
-                repository.setStringPreference("eq_bands_$bc", bands)
-            }
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_CONVOLVER_ENABLE}",
-                s.convolverEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_CONVOLVER_CROSS_CHANNEL}",
-                s.convolverCrossChannel
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_FIELD_SURROUND_ENABLE}",
-                s.fieldSurroundEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FIELD_SURROUND_WIDENING}",
-                s.fieldSurroundWidening
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FIELD_SURROUND_MID_IMAGE}",
-                s.fieldSurroundMidImage
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_FIELD_SURROUND_DEPTH}",
-                s.fieldSurroundDepth
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_DIFF_SURROUND_ENABLE}",
-                s.diffSurroundEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_DIFF_SURROUND_DELAY}",
-                s.diffSurroundDelay
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_HEADPHONE_SURROUND_ENABLE}",
-                s.vheEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_HEADPHONE_SURROUND_STRENGTH}",
-                s.vheQuality
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_REVERB_ENABLE}",
-                s.reverbEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_REVERB_ROOM_SIZE}",
-                s.reverbRoomSize
-            )
-            repository.setIntPreference("${ViperParams.PARAM_HP_REVERB_ROOM_WIDTH}", s.reverbWidth)
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_REVERB_ROOM_DAMPENING}",
-                s.reverbDampening
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_REVERB_ROOM_WET_SIGNAL}",
-                s.reverbWet
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_REVERB_ROOM_DRY_SIGNAL}",
-                s.reverbDry
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_ENABLE}",
-                s.dynamicSystemEnabled
-            )
-            repository.setIntPreference("dynamic_system_device", s.dynamicSystemDevice)
-            repository.setIntPreference(
-                "${ViperParams.PARAM_HP_DYNAMIC_SYSTEM_STRENGTH}",
-                s.dynamicSystemStrength
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_TUBE_SIMULATOR_ENABLE}",
-                s.tubeSimulatorEnabled
-            )
-            repository.setBooleanPreference("${ViperParams.PARAM_HP_BASS_ENABLE}", s.bassEnabled)
-            repository.setIntPreference("${ViperParams.PARAM_HP_BASS_MODE}", s.bassMode)
-            repository.setIntPreference("${ViperParams.PARAM_HP_BASS_FREQUENCY}", s.bassFrequency)
-            repository.setIntPreference("${ViperParams.PARAM_HP_BASS_GAIN}", s.bassGain)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_CLARITY_ENABLE}",
-                s.clarityEnabled
-            )
-            repository.setIntPreference("${ViperParams.PARAM_HP_CLARITY_MODE}", s.clarityMode)
-            repository.setIntPreference("${ViperParams.PARAM_HP_CLARITY_GAIN}", s.clarityGain)
-            repository.setBooleanPreference("${ViperParams.PARAM_HP_CURE_ENABLE}", s.cureEnabled)
-            repository.setIntPreference("${ViperParams.PARAM_HP_CURE_STRENGTH}", s.cureStrength)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_HP_ANALOGX_ENABLE}",
-                s.analogxEnabled
-            )
-            repository.setIntPreference("${ViperParams.PARAM_HP_ANALOGX_MODE}", s.analogxMode)
-        } else {
-            repository.setBooleanPreference("spk_master_enable", s.spkMasterEnabled)
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_DDC_ENABLE}",
-                s.spkDdcEnabled
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_ENABLE}",
-                s.spkVseEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_BARK}",
-                s.spkVseStrength
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_SPECTRUM_EXTENSION_BARK_RECONSTRUCT}",
-                s.spkVseExciter
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_ENABLE}",
-                s.spkFieldSurroundEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_WIDENING}",
-                s.spkFieldSurroundWidening
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_MID_IMAGE}",
-                s.spkFieldSurroundMidImage
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_FIELD_SURROUND_DEPTH}",
-                s.spkFieldSurroundDepth
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_ENABLE}",
-                s.spkDiffSurroundEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_DELAY}",
-                s.spkDiffSurroundDelay
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_HEADPHONE_SURROUND_ENABLE}",
-                s.spkVheEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_HEADPHONE_SURROUND_STRENGTH}",
-                s.spkVheQuality
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_DYNAMIC_SYSTEM_ENABLE}",
-                s.spkDynamicSystemEnabled
-            )
-            repository.setIntPreference("spk_dynamic_system_device", s.spkDynamicSystemDevice)
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_DYNAMIC_SYSTEM_STRENGTH}",
-                s.spkDynamicSystemStrength
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_TUBE_SIMULATOR_ENABLE}",
-                s.spkTubeSimulatorEnabled
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_BASS_ENABLE}",
-                s.spkBassEnabled
-            )
-            repository.setIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MODE}", s.spkBassMode)
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_BASS_FREQUENCY}",
-                s.spkBassFrequency
-            )
-            repository.setIntPreference("spk_${ViperParams.PARAM_SPK_BASS_GAIN}", s.spkBassGain)
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_BASS_MONO_ENABLE}",
-                s.spkBassMonoEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_BASS_MONO_MODE}",
-                s.spkBassMonoMode
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_BASS_MONO_FREQUENCY}",
-                s.spkBassMonoFrequency
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_BASS_MONO_GAIN}",
-                s.spkBassMonoGain
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_CLARITY_ENABLE}",
-                s.spkClarityEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_CLARITY_MODE}",
-                s.spkClarityMode
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_CLARITY_GAIN}",
-                s.spkClarityGain
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_CURE_ENABLE}",
-                s.spkCureEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_CURE_STRENGTH}",
-                s.spkCureStrength
-            )
-            repository.setBooleanPreference(
-                "spk_${ViperParams.PARAM_SPK_ANALOGX_ENABLE}",
-                s.spkAnalogxEnabled
-            )
-            repository.setIntPreference(
-                "spk_${ViperParams.PARAM_SPK_ANALOGX_MODE}",
-                s.spkAnalogxMode
-            )
-            repository.setIntPreference("spk_${ViperParams.PARAM_SPK_CHANNEL_PAN}", s.spkChannelPan)
-            repository.setBooleanPreference("speaker_optimization_enable", s.speakerOptEnabled)
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_CONVOLVER_ENABLE}",
-                s.spkConvolverEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_CONVOLVER_CROSS_CHANNEL}",
-                s.spkConvolverCrossChannel
-            )
-            repository.setIntPreference("spk_eq_band_count", s.spkEqBandCount)
-            repository.setBooleanPreference("${ViperParams.PARAM_SPK_EQ_ENABLE}", s.spkEqEnabled)
-            repository.setStringPreference("${ViperParams.PARAM_SPK_EQ_BAND_LEVEL}", s.spkEqBands)
+        val isSpk = fxType != ViperParams.FX_TYPE_HEADPHONE
+        saveEffectPrefs(repository, s, isSpk)
+        if (isSpk) {
             for ((bc, bands) in s.spkEqBandsMap) {
                 repository.setStringPreference("spk_eq_bands_$bc", bands)
             }
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_REVERB_ENABLE}",
-                s.spkReverbEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_REVERB_ROOM_SIZE}",
-                s.spkReverbRoomSize
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_REVERB_ROOM_WIDTH}",
-                s.spkReverbWidth
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_REVERB_ROOM_DAMPENING}",
-                s.spkReverbDampening
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_REVERB_ROOM_WET_SIGNAL}",
-                s.spkReverbWet
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_REVERB_ROOM_DRY_SIGNAL}",
-                s.spkReverbDry
-            )
-            repository.setBooleanPreference("${ViperParams.PARAM_SPK_AGC_ENABLE}", s.spkAgcEnabled)
-            repository.setIntPreference("${ViperParams.PARAM_SPK_AGC_RATIO}", s.spkAgcStrength)
-            repository.setIntPreference("${ViperParams.PARAM_SPK_AGC_MAX_SCALER}", s.spkAgcMaxGain)
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_AGC_VOLUME}",
-                s.spkAgcOutputThreshold
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_ENABLE}",
-                s.spkFetEnabled
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_THRESHOLD}",
-                s.spkFetThreshold
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_RATIO}",
-                s.spkFetRatio
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_KNEE}",
-                s.spkFetAutoKnee
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_KNEE}",
-                s.spkFetKnee
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_KNEE_MULTI}",
-                s.spkFetKneeMulti
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_GAIN}",
-                s.spkFetAutoGain
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_GAIN}",
-                s.spkFetGain
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_ATTACK}",
-                s.spkFetAutoAttack
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_ATTACK}",
-                s.spkFetAttack
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_MAX_ATTACK}",
-                s.spkFetMaxAttack
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_AUTO_RELEASE}",
-                s.spkFetAutoRelease
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_RELEASE}",
-                s.spkFetRelease
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_MAX_RELEASE}",
-                s.spkFetMaxRelease
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_CREST}",
-                s.spkFetCrest
-            )
-            repository.setIntPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_ADAPT}",
-                s.spkFetAdapt
-            )
-            repository.setBooleanPreference(
-                "${ViperParams.PARAM_SPK_FET_COMPRESSOR_NO_CLIP}",
-                s.spkFetNoClip
-            )
-            repository.setIntPreference("${ViperParams.PARAM_SPK_OUTPUT_VOLUME}", s.spkOutputVolume)
-            repository.setIntPreference("${ViperParams.PARAM_SPK_LIMITER}", s.spkLimiter)
+        } else {
+            for ((bc, bands) in s.eqBandsMap) {
+                repository.setStringPreference("eq_bands_$bc", bands)
+            }
         }
     }
 
@@ -4824,660 +3675,31 @@ class MainViewModel @Inject constructor(
     }
 
     private fun serializeStateForMode(state: MainUiState, fxType: Int): String {
-        val obj = JSONObject()
-        if (fxType == ViperParams.FX_TYPE_HEADPHONE) {
-            obj.put("masterEnabled", state.masterEnabled)
-            obj.put("outputVolume", state.outputVolume)
-            obj.put("channelPan", state.channelPan)
-            obj.put("limiter", state.limiter)
-            obj.put("agcEnabled", state.agcEnabled)
-            obj.put("agcStrength", state.agcStrength)
-            obj.put("agcMaxGain", state.agcMaxGain)
-            obj.put("agcOutputThreshold", state.agcOutputThreshold)
-            obj.put("fetEnabled", state.fetEnabled)
-            obj.put("fetThreshold", state.fetThreshold)
-            obj.put("fetRatio", state.fetRatio)
-            obj.put("fetAutoKnee", state.fetAutoKnee)
-            obj.put("fetKnee", state.fetKnee)
-            obj.put("fetKneeMulti", state.fetKneeMulti)
-            obj.put("fetAutoGain", state.fetAutoGain)
-            obj.put("fetGain", state.fetGain)
-            obj.put("fetAutoAttack", state.fetAutoAttack)
-            obj.put("fetAttack", state.fetAttack)
-            obj.put("fetMaxAttack", state.fetMaxAttack)
-            obj.put("fetAutoRelease", state.fetAutoRelease)
-            obj.put("fetRelease", state.fetRelease)
-            obj.put("fetMaxRelease", state.fetMaxRelease)
-            obj.put("fetCrest", state.fetCrest)
-            obj.put("fetAdapt", state.fetAdapt)
-            obj.put("fetNoClip", state.fetNoClip)
-            obj.put("ddcEnabled", state.ddcEnabled)
-            obj.put("vseEnabled", state.vseEnabled)
-            obj.put("vseStrength", state.vseStrength)
-            obj.put("vseExciter", state.vseExciter)
-            obj.put("eqEnabled", state.eqEnabled)
-            obj.put("eqBandCount", state.eqBandCount)
-            obj.put("eqBands", state.eqBands)
-            obj.put("convolverEnabled", state.convolverEnabled)
-            obj.put("convolverCrossChannel", state.convolverCrossChannel)
-            obj.put("fieldSurroundEnabled", state.fieldSurroundEnabled)
-            obj.put("fieldSurroundWidening", state.fieldSurroundWidening)
-            obj.put("fieldSurroundMidImage", state.fieldSurroundMidImage)
-            obj.put("fieldSurroundDepth", state.fieldSurroundDepth)
-            obj.put("diffSurroundEnabled", state.diffSurroundEnabled)
-            obj.put("diffSurroundDelay", state.diffSurroundDelay)
-            obj.put("vheEnabled", state.vheEnabled)
-            obj.put("vheQuality", state.vheQuality)
-            obj.put("reverbEnabled", state.reverbEnabled)
-            obj.put("reverbRoomSize", state.reverbRoomSize)
-            obj.put("reverbWidth", state.reverbWidth)
-            obj.put("reverbDampening", state.reverbDampening)
-            obj.put("reverbWet", state.reverbWet)
-            obj.put("reverbDry", state.reverbDry)
-            obj.put("dynamicSystemEnabled", state.dynamicSystemEnabled)
-            obj.put("dynamicSystemDevice", state.dynamicSystemDevice)
-            obj.put("dynamicSystemStrength", state.dynamicSystemStrength)
-            obj.put("dsPresetId", state.dsPresetId ?: -1)
-            obj.put("dsXLow", state.dsXLow)
-            obj.put("dsXHigh", state.dsXHigh)
-            obj.put("dsYLow", state.dsYLow)
-            obj.put("dsYHigh", state.dsYHigh)
-            obj.put("dsSideGainLow", state.dsSideGainLow)
-            obj.put("dsSideGainHigh", state.dsSideGainHigh)
-            obj.put("tubeSimulatorEnabled", state.tubeSimulatorEnabled)
-            obj.put("bassEnabled", state.bassEnabled)
-            obj.put("bassMode", state.bassMode)
-            obj.put("bassFrequency", state.bassFrequency)
-            obj.put("bassGain", state.bassGain)
-            obj.put("bassAntiPop", state.bassAntiPop)
-            obj.put("bassMonoEnabled", state.bassMonoEnabled)
-            obj.put("bassMonoMode", state.bassMonoMode)
-            obj.put("bassMonoFrequency", state.bassMonoFrequency)
-            obj.put("bassMonoGain", state.bassMonoGain)
-            obj.put("bassMonoAntiPop", state.bassMonoAntiPop)
-            obj.put("clarityEnabled", state.clarityEnabled)
-            obj.put("clarityMode", state.clarityMode)
-            obj.put("clarityGain", state.clarityGain)
-            obj.put("cureEnabled", state.cureEnabled)
-            obj.put("cureStrength", state.cureStrength)
-            obj.put("analogxEnabled", state.analogxEnabled)
-            obj.put("analogxMode", state.analogxMode)
-        } else {
-            obj.put("spkMasterEnabled", state.spkMasterEnabled)
-            obj.put("speakerOptEnabled", state.speakerOptEnabled)
-            obj.put("spkConvolverEnabled", state.spkConvolverEnabled)
-            obj.put("spkConvolverCrossChannel", state.spkConvolverCrossChannel)
-            obj.put("spkEqEnabled", state.spkEqEnabled)
-            obj.put("spkEqBandCount", state.spkEqBandCount)
-            obj.put("spkEqBands", state.spkEqBands)
-            obj.put("spkReverbEnabled", state.spkReverbEnabled)
-            obj.put("spkReverbRoomSize", state.spkReverbRoomSize)
-            obj.put("spkReverbWidth", state.spkReverbWidth)
-            obj.put("spkReverbDampening", state.spkReverbDampening)
-            obj.put("spkReverbWet", state.spkReverbWet)
-            obj.put("spkReverbDry", state.spkReverbDry)
-            obj.put("spkAgcEnabled", state.spkAgcEnabled)
-            obj.put("spkAgcStrength", state.spkAgcStrength)
-            obj.put("spkAgcMaxGain", state.spkAgcMaxGain)
-            obj.put("spkAgcOutputThreshold", state.spkAgcOutputThreshold)
-            obj.put("spkFetEnabled", state.spkFetEnabled)
-            obj.put("spkFetThreshold", state.spkFetThreshold)
-            obj.put("spkFetRatio", state.spkFetRatio)
-            obj.put("spkFetAutoKnee", state.spkFetAutoKnee)
-            obj.put("spkFetKnee", state.spkFetKnee)
-            obj.put("spkFetKneeMulti", state.spkFetKneeMulti)
-            obj.put("spkFetAutoGain", state.spkFetAutoGain)
-            obj.put("spkFetGain", state.spkFetGain)
-            obj.put("spkFetAutoAttack", state.spkFetAutoAttack)
-            obj.put("spkFetAttack", state.spkFetAttack)
-            obj.put("spkFetMaxAttack", state.spkFetMaxAttack)
-            obj.put("spkFetAutoRelease", state.spkFetAutoRelease)
-            obj.put("spkFetRelease", state.spkFetRelease)
-            obj.put("spkFetMaxRelease", state.spkFetMaxRelease)
-            obj.put("spkFetCrest", state.spkFetCrest)
-            obj.put("spkFetAdapt", state.spkFetAdapt)
-            obj.put("spkFetNoClip", state.spkFetNoClip)
-            obj.put("spkOutputVolume", state.spkOutputVolume)
-            obj.put("spkLimiter", state.spkLimiter)
-            obj.put("spkDdcEnabled", state.spkDdcEnabled)
-            obj.put("spkVseEnabled", state.spkVseEnabled)
-            obj.put("spkVseStrength", state.spkVseStrength)
-            obj.put("spkVseExciter", state.spkVseExciter)
-            obj.put("spkFieldSurroundEnabled", state.spkFieldSurroundEnabled)
-            obj.put("spkFieldSurroundWidening", state.spkFieldSurroundWidening)
-            obj.put("spkFieldSurroundMidImage", state.spkFieldSurroundMidImage)
-            obj.put("spkFieldSurroundDepth", state.spkFieldSurroundDepth)
-            obj.put("spkDiffSurroundEnabled", state.spkDiffSurroundEnabled)
-            obj.put("spkDiffSurroundDelay", state.spkDiffSurroundDelay)
-            obj.put("spkVheEnabled", state.spkVheEnabled)
-            obj.put("spkVheQuality", state.spkVheQuality)
-            obj.put("spkDynamicSystemEnabled", state.spkDynamicSystemEnabled)
-            obj.put("spkDynamicSystemDevice", state.spkDynamicSystemDevice)
-            obj.put("spkDynamicSystemStrength", state.spkDynamicSystemStrength)
-            obj.put("spkDsPresetId", state.spkDsPresetId ?: -1)
-            obj.put("spkDsXLow", state.spkDsXLow)
-            obj.put("spkDsXHigh", state.spkDsXHigh)
-            obj.put("spkDsYLow", state.spkDsYLow)
-            obj.put("spkDsYHigh", state.spkDsYHigh)
-            obj.put("spkDsSideGainLow", state.spkDsSideGainLow)
-            obj.put("spkDsSideGainHigh", state.spkDsSideGainHigh)
-            obj.put("spkTubeSimulatorEnabled", state.spkTubeSimulatorEnabled)
-            obj.put("spkBassEnabled", state.spkBassEnabled)
-            obj.put("spkBassMode", state.spkBassMode)
-            obj.put("spkBassFrequency", state.spkBassFrequency)
-            obj.put("spkBassGain", state.spkBassGain)
-            obj.put("spkBassAntiPop", state.spkBassAntiPop)
-            obj.put("spkBassMonoEnabled", state.spkBassMonoEnabled)
-            obj.put("spkBassMonoMode", state.spkBassMonoMode)
-            obj.put("spkBassMonoFrequency", state.spkBassMonoFrequency)
-            obj.put("spkBassMonoGain", state.spkBassMonoGain)
-            obj.put("spkBassMonoAntiPop", state.spkBassMonoAntiPop)
-            obj.put("spkClarityEnabled", state.spkClarityEnabled)
-            obj.put("spkClarityMode", state.spkClarityMode)
-            obj.put("spkClarityGain", state.spkClarityGain)
-            obj.put("spkCureEnabled", state.spkCureEnabled)
-            obj.put("spkCureStrength", state.spkCureStrength)
-            obj.put("spkAnalogxEnabled", state.spkAnalogxEnabled)
-            obj.put("spkAnalogxMode", state.spkAnalogxMode)
-            obj.put("spkChannelPan", state.spkChannelPan)
-        }
+        val isSpk = fxType != ViperParams.FX_TYPE_HEADPHONE
+        val obj = serializeEffectPrefs(state, isSpk)
         return obj.toString()
     }
 
     private fun deserializeAndApplyState(json: String) {
         val obj = JSONObject(json)
         _uiState.update { state ->
-            state.copy(
-                masterEnabled = obj.optBoolean("masterEnabled", state.masterEnabled),
-                outputVolume = obj.optInt("outputVolume", state.outputVolume),
-                channelPan = obj.optInt("channelPan", state.channelPan),
-                limiter = obj.optInt("limiter", state.limiter),
-                agcEnabled = obj.optBoolean("agcEnabled", state.agcEnabled),
-                agcStrength = obj.optInt("agcStrength", state.agcStrength),
-                agcMaxGain = obj.optInt("agcMaxGain", state.agcMaxGain),
-                agcOutputThreshold = obj.optInt("agcOutputThreshold", state.agcOutputThreshold),
-                fetEnabled = obj.optBoolean("fetEnabled", state.fetEnabled),
-                fetThreshold = obj.optInt("fetThreshold", state.fetThreshold),
-                fetRatio = obj.optInt("fetRatio", state.fetRatio),
-                fetAutoKnee = obj.optBoolean("fetAutoKnee", state.fetAutoKnee),
-                fetKnee = obj.optInt("fetKnee", state.fetKnee),
-                fetKneeMulti = obj.optInt("fetKneeMulti", state.fetKneeMulti),
-                fetAutoGain = obj.optBoolean("fetAutoGain", state.fetAutoGain),
-                fetGain = obj.optInt("fetGain", state.fetGain),
-                fetAutoAttack = obj.optBoolean("fetAutoAttack", state.fetAutoAttack),
-                fetAttack = obj.optInt("fetAttack", state.fetAttack),
-                fetMaxAttack = obj.optInt("fetMaxAttack", state.fetMaxAttack),
-                fetAutoRelease = obj.optBoolean("fetAutoRelease", state.fetAutoRelease),
-                fetRelease = obj.optInt("fetRelease", state.fetRelease),
-                fetMaxRelease = obj.optInt("fetMaxRelease", state.fetMaxRelease),
-                fetCrest = obj.optInt("fetCrest", state.fetCrest),
-                fetAdapt = obj.optInt("fetAdapt", state.fetAdapt),
-                fetNoClip = obj.optBoolean("fetNoClip", state.fetNoClip),
-                ddcEnabled = obj.optBoolean("ddcEnabled", state.ddcEnabled),
-                vseEnabled = obj.optBoolean("vseEnabled", state.vseEnabled),
-                vseStrength = obj.optInt("vseStrength", state.vseStrength),
-                vseExciter = obj.optInt("vseExciter", state.vseExciter),
-                eqEnabled = obj.optBoolean("eqEnabled", state.eqEnabled),
-                eqBandCount = obj.optInt("eqBandCount", state.eqBandCount),
-                eqBands = obj.optString("eqBands", state.eqBands),
-                convolverEnabled = obj.optBoolean("convolverEnabled", state.convolverEnabled),
-                convolverCrossChannel = obj.optInt(
-                    "convolverCrossChannel",
-                    state.convolverCrossChannel
-                ),
-                fieldSurroundEnabled = obj.optBoolean(
-                    "fieldSurroundEnabled",
-                    state.fieldSurroundEnabled
-                ),
-                fieldSurroundWidening = obj.optInt(
-                    "fieldSurroundWidening",
-                    state.fieldSurroundWidening
-                ),
-                fieldSurroundMidImage = obj.optInt(
-                    "fieldSurroundMidImage",
-                    state.fieldSurroundMidImage
-                ),
-                fieldSurroundDepth = obj.optInt("fieldSurroundDepth", state.fieldSurroundDepth),
-                diffSurroundEnabled = obj.optBoolean(
-                    "diffSurroundEnabled",
-                    state.diffSurroundEnabled
-                ),
-                diffSurroundDelay = obj.optInt("diffSurroundDelay", state.diffSurroundDelay),
-                vheEnabled = obj.optBoolean("vheEnabled", state.vheEnabled),
-                vheQuality = obj.optInt("vheQuality", state.vheQuality),
-                reverbEnabled = obj.optBoolean("reverbEnabled", state.reverbEnabled),
-                reverbRoomSize = obj.optInt("reverbRoomSize", state.reverbRoomSize),
-                reverbWidth = obj.optInt("reverbWidth", state.reverbWidth),
-                reverbDampening = obj.optInt("reverbDampening", state.reverbDampening),
-                reverbWet = obj.optInt("reverbWet", state.reverbWet),
-                reverbDry = obj.optInt("reverbDry", state.reverbDry),
-                dynamicSystemEnabled = obj.optBoolean(
-                    "dynamicSystemEnabled",
-                    state.dynamicSystemEnabled
-                ),
-                dynamicSystemDevice = obj.optInt("dynamicSystemDevice", state.dynamicSystemDevice),
-                dynamicSystemStrength = obj.optInt(
-                    "dynamicSystemStrength",
-                    state.dynamicSystemStrength
-                ),
-                dsPresetId = obj.optInt("dsPresetId", -1).let { if (it < 0) null else it.toLong() },
-                dsXLow = obj.optInt("dsXLow", state.dsXLow),
-                dsXHigh = obj.optInt("dsXHigh", state.dsXHigh),
-                dsYLow = obj.optInt("dsYLow", state.dsYLow),
-                dsYHigh = obj.optInt("dsYHigh", state.dsYHigh),
-                dsSideGainLow = obj.optInt("dsSideGainLow", state.dsSideGainLow),
-                dsSideGainHigh = obj.optInt("dsSideGainHigh", state.dsSideGainHigh),
-                tubeSimulatorEnabled = obj.optBoolean(
-                    "tubeSimulatorEnabled",
-                    state.tubeSimulatorEnabled
-                ),
-                bassEnabled = obj.optBoolean("bassEnabled", state.bassEnabled),
-                bassMode = obj.optInt("bassMode", state.bassMode),
-                bassFrequency = obj.optInt("bassFrequency", state.bassFrequency),
-                bassGain = obj.optInt("bassGain", state.bassGain),
-                bassAntiPop = obj.optBoolean("bassAntiPop", state.bassAntiPop),
-                bassMonoEnabled = obj.optBoolean("bassMonoEnabled", state.bassMonoEnabled),
-                bassMonoMode = obj.optInt("bassMonoMode", state.bassMonoMode),
-                bassMonoFrequency = obj.optInt("bassMonoFrequency", state.bassMonoFrequency),
-                bassMonoGain = obj.optInt("bassMonoGain", state.bassMonoGain),
-                bassMonoAntiPop = obj.optBoolean("bassMonoAntiPop", state.bassMonoAntiPop),
-                clarityEnabled = obj.optBoolean("clarityEnabled", state.clarityEnabled),
-                clarityMode = obj.optInt("clarityMode", state.clarityMode),
-                clarityGain = obj.optInt("clarityGain", state.clarityGain),
-                cureEnabled = obj.optBoolean("cureEnabled", state.cureEnabled),
-                cureStrength = obj.optInt("cureStrength", state.cureStrength),
-                analogxEnabled = obj.optBoolean("analogxEnabled", state.analogxEnabled),
-                analogxMode = obj.optInt("analogxMode", state.analogxMode),
-                spkMasterEnabled = obj.optBoolean("spkMasterEnabled", state.spkMasterEnabled),
-                speakerOptEnabled = obj.optBoolean("speakerOptEnabled", state.speakerOptEnabled),
-                spkConvolverEnabled = obj.optBoolean(
-                    "spkConvolverEnabled",
-                    state.spkConvolverEnabled
-                ),
-                spkConvolverCrossChannel = obj.optInt(
-                    "spkConvolverCrossChannel",
-                    state.spkConvolverCrossChannel
-                ),
-                spkEqEnabled = obj.optBoolean("spkEqEnabled", state.spkEqEnabled),
-                spkEqBandCount = obj.optInt("spkEqBandCount", state.spkEqBandCount),
-                spkEqBands = obj.optString("spkEqBands", state.spkEqBands),
-                spkReverbEnabled = obj.optBoolean("spkReverbEnabled", state.spkReverbEnabled),
-                spkReverbRoomSize = obj.optInt("spkReverbRoomSize", state.spkReverbRoomSize),
-                spkReverbWidth = obj.optInt("spkReverbWidth", state.spkReverbWidth),
-                spkReverbDampening = obj.optInt("spkReverbDampening", state.spkReverbDampening),
-                spkReverbWet = obj.optInt("spkReverbWet", state.spkReverbWet),
-                spkReverbDry = obj.optInt("spkReverbDry", state.spkReverbDry),
-                spkAgcEnabled = obj.optBoolean("spkAgcEnabled", state.spkAgcEnabled),
-                spkAgcStrength = obj.optInt("spkAgcStrength", state.spkAgcStrength),
-                spkAgcMaxGain = obj.optInt("spkAgcMaxGain", state.spkAgcMaxGain),
-                spkAgcOutputThreshold = obj.optInt(
-                    "spkAgcOutputThreshold",
-                    state.spkAgcOutputThreshold
-                ),
-                spkFetEnabled = obj.optBoolean("spkFetEnabled", state.spkFetEnabled),
-                spkFetThreshold = obj.optInt("spkFetThreshold", state.spkFetThreshold),
-                spkFetRatio = obj.optInt("spkFetRatio", state.spkFetRatio),
-                spkFetAutoKnee = obj.optBoolean("spkFetAutoKnee", state.spkFetAutoKnee),
-                spkFetKnee = obj.optInt("spkFetKnee", state.spkFetKnee),
-                spkFetKneeMulti = obj.optInt("spkFetKneeMulti", state.spkFetKneeMulti),
-                spkFetAutoGain = obj.optBoolean("spkFetAutoGain", state.spkFetAutoGain),
-                spkFetGain = obj.optInt("spkFetGain", state.spkFetGain),
-                spkFetAutoAttack = obj.optBoolean("spkFetAutoAttack", state.spkFetAutoAttack),
-                spkFetAttack = obj.optInt("spkFetAttack", state.spkFetAttack),
-                spkFetMaxAttack = obj.optInt("spkFetMaxAttack", state.spkFetMaxAttack),
-                spkFetAutoRelease = obj.optBoolean("spkFetAutoRelease", state.spkFetAutoRelease),
-                spkFetRelease = obj.optInt("spkFetRelease", state.spkFetRelease),
-                spkFetMaxRelease = obj.optInt("spkFetMaxRelease", state.spkFetMaxRelease),
-                spkFetCrest = obj.optInt("spkFetCrest", state.spkFetCrest),
-                spkFetAdapt = obj.optInt("spkFetAdapt", state.spkFetAdapt),
-                spkFetNoClip = obj.optBoolean("spkFetNoClip", state.spkFetNoClip),
-                spkOutputVolume = obj.optInt("spkOutputVolume", state.spkOutputVolume),
-                spkLimiter = obj.optInt("spkLimiter", state.spkLimiter),
-                spkDdcEnabled = obj.optBoolean("spkDdcEnabled", state.spkDdcEnabled),
-                spkVseEnabled = obj.optBoolean("spkVseEnabled", state.spkVseEnabled),
-                spkVseStrength = obj.optInt("spkVseStrength", state.spkVseStrength),
-                spkVseExciter = obj.optInt("spkVseExciter", state.spkVseExciter),
-                spkFieldSurroundEnabled = obj.optBoolean(
-                    "spkFieldSurroundEnabled",
-                    state.spkFieldSurroundEnabled
-                ),
-                spkFieldSurroundWidening = obj.optInt(
-                    "spkFieldSurroundWidening",
-                    state.spkFieldSurroundWidening
-                ),
-                spkFieldSurroundMidImage = obj.optInt(
-                    "spkFieldSurroundMidImage",
-                    state.spkFieldSurroundMidImage
-                ),
-                spkFieldSurroundDepth = obj.optInt(
-                    "spkFieldSurroundDepth",
-                    state.spkFieldSurroundDepth
-                ),
-                spkDiffSurroundEnabled = obj.optBoolean(
-                    "spkDiffSurroundEnabled",
-                    state.spkDiffSurroundEnabled
-                ),
-                spkDiffSurroundDelay = obj.optInt(
-                    "spkDiffSurroundDelay",
-                    state.spkDiffSurroundDelay
-                ),
-                spkVheEnabled = obj.optBoolean("spkVheEnabled", state.spkVheEnabled),
-                spkVheQuality = obj.optInt("spkVheQuality", state.spkVheQuality),
-                spkDynamicSystemEnabled = obj.optBoolean(
-                    "spkDynamicSystemEnabled",
-                    state.spkDynamicSystemEnabled
-                ),
-                spkDynamicSystemDevice = obj.optInt(
-                    "spkDynamicSystemDevice",
-                    state.spkDynamicSystemDevice
-                ),
-                spkDynamicSystemStrength = obj.optInt(
-                    "spkDynamicSystemStrength",
-                    state.spkDynamicSystemStrength
-                ),
-                spkDsPresetId = obj.optInt("spkDsPresetId", -1)
-                    .let { if (it < 0) null else it.toLong() },
-                spkDsXLow = obj.optInt("spkDsXLow", state.spkDsXLow),
-                spkDsXHigh = obj.optInt("spkDsXHigh", state.spkDsXHigh),
-                spkDsYLow = obj.optInt("spkDsYLow", state.spkDsYLow),
-                spkDsYHigh = obj.optInt("spkDsYHigh", state.spkDsYHigh),
-                spkDsSideGainLow = obj.optInt("spkDsSideGainLow", state.spkDsSideGainLow),
-                spkDsSideGainHigh = obj.optInt("spkDsSideGainHigh", state.spkDsSideGainHigh),
-                spkTubeSimulatorEnabled = obj.optBoolean(
-                    "spkTubeSimulatorEnabled",
-                    state.spkTubeSimulatorEnabled
-                ),
-                spkBassEnabled = obj.optBoolean("spkBassEnabled", state.spkBassEnabled),
-                spkBassMode = obj.optInt("spkBassMode", state.spkBassMode),
-                spkBassFrequency = obj.optInt("spkBassFrequency", state.spkBassFrequency),
-                spkBassGain = obj.optInt("spkBassGain", state.spkBassGain),
-                spkBassAntiPop = obj.optBoolean("spkBassAntiPop", state.spkBassAntiPop),
-                spkBassMonoEnabled = obj.optBoolean("spkBassMonoEnabled", state.spkBassMonoEnabled),
-                spkBassMonoMode = obj.optInt("spkBassMonoMode", state.spkBassMonoMode),
-                spkBassMonoFrequency = obj.optInt(
-                    "spkBassMonoFrequency",
-                    state.spkBassMonoFrequency
-                ),
-                spkBassMonoGain = obj.optInt("spkBassMonoGain", state.spkBassMonoGain),
-                spkBassMonoAntiPop = obj.optBoolean("spkBassMonoAntiPop", state.spkBassMonoAntiPop),
-                spkClarityEnabled = obj.optBoolean("spkClarityEnabled", state.spkClarityEnabled),
-                spkClarityMode = obj.optInt("spkClarityMode", state.spkClarityMode),
-                spkClarityGain = obj.optInt("spkClarityGain", state.spkClarityGain),
-                spkCureEnabled = obj.optBoolean("spkCureEnabled", state.spkCureEnabled),
-                spkCureStrength = obj.optInt("spkCureStrength", state.spkCureStrength),
-                spkAnalogxEnabled = obj.optBoolean("spkAnalogxEnabled", state.spkAnalogxEnabled),
-                spkAnalogxMode = obj.optInt("spkAnalogxMode", state.spkAnalogxMode),
-                spkChannelPan = obj.optInt("spkChannelPan", state.spkChannelPan)
-            )
+            var s = deserializeEffectPrefs(obj, state, isSpk = false)
+            s = deserializeEffectPrefs(obj, s, isSpk = true)
+            s
         }
     }
 
     private fun deserializeAndApplyStateForMode(json: String, fxType: Int) {
         val obj = JSONObject(json)
+        val isSpk = fxType != ViperParams.FX_TYPE_HEADPHONE
         _uiState.update { state ->
-            if (fxType == ViperParams.FX_TYPE_HEADPHONE) {
-                state.copy(
-                    masterEnabled = obj.optBoolean("masterEnabled", state.masterEnabled),
-                    outputVolume = obj.optInt("outputVolume", state.outputVolume),
-                    channelPan = obj.optInt("channelPan", state.channelPan),
-                    limiter = obj.optInt("limiter", state.limiter),
-                    agcEnabled = obj.optBoolean("agcEnabled", state.agcEnabled),
-                    agcStrength = obj.optInt("agcStrength", state.agcStrength),
-                    agcMaxGain = obj.optInt("agcMaxGain", state.agcMaxGain),
-                    agcOutputThreshold = obj.optInt("agcOutputThreshold", state.agcOutputThreshold),
-                    fetEnabled = obj.optBoolean("fetEnabled", state.fetEnabled),
-                    fetThreshold = obj.optInt("fetThreshold", state.fetThreshold),
-                    fetRatio = obj.optInt("fetRatio", state.fetRatio),
-                    fetAutoKnee = obj.optBoolean("fetAutoKnee", state.fetAutoKnee),
-                    fetKnee = obj.optInt("fetKnee", state.fetKnee),
-                    fetKneeMulti = obj.optInt("fetKneeMulti", state.fetKneeMulti),
-                    fetAutoGain = obj.optBoolean("fetAutoGain", state.fetAutoGain),
-                    fetGain = obj.optInt("fetGain", state.fetGain),
-                    fetAutoAttack = obj.optBoolean("fetAutoAttack", state.fetAutoAttack),
-                    fetAttack = obj.optInt("fetAttack", state.fetAttack),
-                    fetMaxAttack = obj.optInt("fetMaxAttack", state.fetMaxAttack),
-                    fetAutoRelease = obj.optBoolean("fetAutoRelease", state.fetAutoRelease),
-                    fetRelease = obj.optInt("fetRelease", state.fetRelease),
-                    fetMaxRelease = obj.optInt("fetMaxRelease", state.fetMaxRelease),
-                    fetCrest = obj.optInt("fetCrest", state.fetCrest),
-                    fetAdapt = obj.optInt("fetAdapt", state.fetAdapt),
-                    fetNoClip = obj.optBoolean("fetNoClip", state.fetNoClip),
-                    ddcEnabled = obj.optBoolean("ddcEnabled", state.ddcEnabled),
-                    vseEnabled = obj.optBoolean("vseEnabled", state.vseEnabled),
-                    vseStrength = obj.optInt("vseStrength", state.vseStrength),
-                    vseExciter = obj.optInt("vseExciter", state.vseExciter),
-                    eqEnabled = obj.optBoolean("eqEnabled", state.eqEnabled),
-                    eqBandCount = obj.optInt("eqBandCount", state.eqBandCount),
-                    eqBands = obj.optString("eqBands", state.eqBands),
-                    convolverEnabled = obj.optBoolean("convolverEnabled", state.convolverEnabled),
-                    convolverCrossChannel = obj.optInt(
-                        "convolverCrossChannel",
-                        state.convolverCrossChannel
-                    ),
-                    fieldSurroundEnabled = obj.optBoolean(
-                        "fieldSurroundEnabled",
-                        state.fieldSurroundEnabled
-                    ),
-                    fieldSurroundWidening = obj.optInt(
-                        "fieldSurroundWidening",
-                        state.fieldSurroundWidening
-                    ),
-                    fieldSurroundMidImage = obj.optInt(
-                        "fieldSurroundMidImage",
-                        state.fieldSurroundMidImage
-                    ),
-                    fieldSurroundDepth = obj.optInt("fieldSurroundDepth", state.fieldSurroundDepth),
-                    diffSurroundEnabled = obj.optBoolean(
-                        "diffSurroundEnabled",
-                        state.diffSurroundEnabled
-                    ),
-                    diffSurroundDelay = obj.optInt("diffSurroundDelay", state.diffSurroundDelay),
-                    vheEnabled = obj.optBoolean("vheEnabled", state.vheEnabled),
-                    vheQuality = obj.optInt("vheQuality", state.vheQuality),
-                    reverbEnabled = obj.optBoolean("reverbEnabled", state.reverbEnabled),
-                    reverbRoomSize = obj.optInt("reverbRoomSize", state.reverbRoomSize),
-                    reverbWidth = obj.optInt("reverbWidth", state.reverbWidth),
-                    reverbDampening = obj.optInt("reverbDampening", state.reverbDampening),
-                    reverbWet = obj.optInt("reverbWet", state.reverbWet),
-                    reverbDry = obj.optInt("reverbDry", state.reverbDry),
-                    dynamicSystemEnabled = obj.optBoolean(
-                        "dynamicSystemEnabled",
-                        state.dynamicSystemEnabled
-                    ),
-                    dynamicSystemDevice = obj.optInt(
-                        "dynamicSystemDevice",
-                        state.dynamicSystemDevice
-                    ),
-                    dynamicSystemStrength = obj.optInt(
-                        "dynamicSystemStrength",
-                        state.dynamicSystemStrength
-                    ),
-                    dsPresetId = obj.optInt("dsPresetId", -1)
-                        .let { if (it < 0) null else it.toLong() },
-                    dsXLow = obj.optInt("dsXLow", state.dsXLow),
-                    dsXHigh = obj.optInt("dsXHigh", state.dsXHigh),
-                    dsYLow = obj.optInt("dsYLow", state.dsYLow),
-                    dsYHigh = obj.optInt("dsYHigh", state.dsYHigh),
-                    dsSideGainLow = obj.optInt("dsSideGainLow", state.dsSideGainLow),
-                    dsSideGainHigh = obj.optInt("dsSideGainHigh", state.dsSideGainHigh),
-                    tubeSimulatorEnabled = obj.optBoolean(
-                        "tubeSimulatorEnabled",
-                        state.tubeSimulatorEnabled
-                    ),
-                    bassEnabled = obj.optBoolean("bassEnabled", state.bassEnabled),
-                    bassMode = obj.optInt("bassMode", state.bassMode),
-                    bassFrequency = obj.optInt("bassFrequency", state.bassFrequency),
-                    bassGain = obj.optInt("bassGain", state.bassGain),
-                    bassAntiPop = obj.optBoolean("bassAntiPop", state.bassAntiPop),
-                    bassMonoEnabled = obj.optBoolean("bassMonoEnabled", state.bassMonoEnabled),
-                    bassMonoMode = obj.optInt("bassMonoMode", state.bassMonoMode),
-                    bassMonoFrequency = obj.optInt("bassMonoFrequency", state.bassMonoFrequency),
-                    bassMonoGain = obj.optInt("bassMonoGain", state.bassMonoGain),
-                    bassMonoAntiPop = obj.optBoolean("bassMonoAntiPop", state.bassMonoAntiPop),
-                    clarityEnabled = obj.optBoolean("clarityEnabled", state.clarityEnabled),
-                    clarityMode = obj.optInt("clarityMode", state.clarityMode),
-                    clarityGain = obj.optInt("clarityGain", state.clarityGain),
-                    cureEnabled = obj.optBoolean("cureEnabled", state.cureEnabled),
-                    cureStrength = obj.optInt("cureStrength", state.cureStrength),
-                    analogxEnabled = obj.optBoolean("analogxEnabled", state.analogxEnabled),
-                    analogxMode = obj.optInt("analogxMode", state.analogxMode)
-                )
-            } else {
-                state.copy(
-                    spkMasterEnabled = obj.optBoolean("spkMasterEnabled", state.spkMasterEnabled),
-                    speakerOptEnabled = obj.optBoolean(
-                        "speakerOptEnabled",
-                        state.speakerOptEnabled
-                    ),
-                    spkConvolverEnabled = obj.optBoolean(
-                        "spkConvolverEnabled",
-                        state.spkConvolverEnabled
-                    ),
-                    spkConvolverCrossChannel = obj.optInt(
-                        "spkConvolverCrossChannel",
-                        state.spkConvolverCrossChannel
-                    ),
-                    spkEqEnabled = obj.optBoolean("spkEqEnabled", state.spkEqEnabled),
-                    spkEqBandCount = obj.optInt("spkEqBandCount", state.spkEqBandCount),
-                    spkEqBands = obj.optString("spkEqBands", state.spkEqBands),
-                    spkReverbEnabled = obj.optBoolean("spkReverbEnabled", state.spkReverbEnabled),
-                    spkReverbRoomSize = obj.optInt("spkReverbRoomSize", state.spkReverbRoomSize),
-                    spkReverbWidth = obj.optInt("spkReverbWidth", state.spkReverbWidth),
-                    spkReverbDampening = obj.optInt("spkReverbDampening", state.spkReverbDampening),
-                    spkReverbWet = obj.optInt("spkReverbWet", state.spkReverbWet),
-                    spkReverbDry = obj.optInt("spkReverbDry", state.spkReverbDry),
-                    spkAgcEnabled = obj.optBoolean("spkAgcEnabled", state.spkAgcEnabled),
-                    spkAgcStrength = obj.optInt("spkAgcStrength", state.spkAgcStrength),
-                    spkAgcMaxGain = obj.optInt("spkAgcMaxGain", state.spkAgcMaxGain),
-                    spkAgcOutputThreshold = obj.optInt(
-                        "spkAgcOutputThreshold",
-                        state.spkAgcOutputThreshold
-                    ),
-                    spkFetEnabled = obj.optBoolean("spkFetEnabled", state.spkFetEnabled),
-                    spkFetThreshold = obj.optInt("spkFetThreshold", state.spkFetThreshold),
-                    spkFetRatio = obj.optInt("spkFetRatio", state.spkFetRatio),
-                    spkFetAutoKnee = obj.optBoolean("spkFetAutoKnee", state.spkFetAutoKnee),
-                    spkFetKnee = obj.optInt("spkFetKnee", state.spkFetKnee),
-                    spkFetKneeMulti = obj.optInt("spkFetKneeMulti", state.spkFetKneeMulti),
-                    spkFetAutoGain = obj.optBoolean("spkFetAutoGain", state.spkFetAutoGain),
-                    spkFetGain = obj.optInt("spkFetGain", state.spkFetGain),
-                    spkFetAutoAttack = obj.optBoolean("spkFetAutoAttack", state.spkFetAutoAttack),
-                    spkFetAttack = obj.optInt("spkFetAttack", state.spkFetAttack),
-                    spkFetMaxAttack = obj.optInt("spkFetMaxAttack", state.spkFetMaxAttack),
-                    spkFetAutoRelease = obj.optBoolean(
-                        "spkFetAutoRelease",
-                        state.spkFetAutoRelease
-                    ),
-                    spkFetRelease = obj.optInt("spkFetRelease", state.spkFetRelease),
-                    spkFetMaxRelease = obj.optInt("spkFetMaxRelease", state.spkFetMaxRelease),
-                    spkFetCrest = obj.optInt("spkFetCrest", state.spkFetCrest),
-                    spkFetAdapt = obj.optInt("spkFetAdapt", state.spkFetAdapt),
-                    spkFetNoClip = obj.optBoolean("spkFetNoClip", state.spkFetNoClip),
-                    spkOutputVolume = obj.optInt("spkOutputVolume", state.spkOutputVolume),
-                    spkLimiter = obj.optInt("spkLimiter", state.spkLimiter),
-                    spkDdcEnabled = obj.optBoolean("spkDdcEnabled", state.spkDdcEnabled),
-                    spkVseEnabled = obj.optBoolean("spkVseEnabled", state.spkVseEnabled),
-                    spkVseStrength = obj.optInt("spkVseStrength", state.spkVseStrength),
-                    spkVseExciter = obj.optInt("spkVseExciter", state.spkVseExciter),
-                    spkFieldSurroundEnabled = obj.optBoolean(
-                        "spkFieldSurroundEnabled",
-                        state.spkFieldSurroundEnabled
-                    ),
-                    spkFieldSurroundWidening = obj.optInt(
-                        "spkFieldSurroundWidening",
-                        state.spkFieldSurroundWidening
-                    ),
-                    spkFieldSurroundMidImage = obj.optInt(
-                        "spkFieldSurroundMidImage",
-                        state.spkFieldSurroundMidImage
-                    ),
-                    spkFieldSurroundDepth = obj.optInt(
-                        "spkFieldSurroundDepth",
-                        state.spkFieldSurroundDepth
-                    ),
-                    spkDiffSurroundEnabled = obj.optBoolean(
-                        "spkDiffSurroundEnabled",
-                        state.spkDiffSurroundEnabled
-                    ),
-                    spkDiffSurroundDelay = obj.optInt(
-                        "spkDiffSurroundDelay",
-                        state.spkDiffSurroundDelay
-                    ),
-                    spkVheEnabled = obj.optBoolean("spkVheEnabled", state.spkVheEnabled),
-                    spkVheQuality = obj.optInt("spkVheQuality", state.spkVheQuality),
-                    spkDynamicSystemEnabled = obj.optBoolean(
-                        "spkDynamicSystemEnabled",
-                        state.spkDynamicSystemEnabled
-                    ),
-                    spkDynamicSystemDevice = obj.optInt(
-                        "spkDynamicSystemDevice",
-                        state.spkDynamicSystemDevice
-                    ),
-                    spkDynamicSystemStrength = obj.optInt(
-                        "spkDynamicSystemStrength",
-                        state.spkDynamicSystemStrength
-                    ),
-                    spkDsPresetId = obj.optInt("spkDsPresetId", -1)
-                        .let { if (it < 0) null else it.toLong() },
-                    spkDsXLow = obj.optInt("spkDsXLow", state.spkDsXLow),
-                    spkDsXHigh = obj.optInt("spkDsXHigh", state.spkDsXHigh),
-                    spkDsYLow = obj.optInt("spkDsYLow", state.spkDsYLow),
-                    spkDsYHigh = obj.optInt("spkDsYHigh", state.spkDsYHigh),
-                    spkDsSideGainLow = obj.optInt("spkDsSideGainLow", state.spkDsSideGainLow),
-                    spkDsSideGainHigh = obj.optInt("spkDsSideGainHigh", state.spkDsSideGainHigh),
-                    spkTubeSimulatorEnabled = obj.optBoolean(
-                        "spkTubeSimulatorEnabled",
-                        state.spkTubeSimulatorEnabled
-                    ),
-                    spkBassEnabled = obj.optBoolean("spkBassEnabled", state.spkBassEnabled),
-                    spkBassMode = obj.optInt("spkBassMode", state.spkBassMode),
-                    spkBassFrequency = obj.optInt("spkBassFrequency", state.spkBassFrequency),
-                    spkBassGain = obj.optInt("spkBassGain", state.spkBassGain),
-                    spkBassAntiPop = obj.optBoolean("spkBassAntiPop", state.spkBassAntiPop),
-                    spkBassMonoEnabled = obj.optBoolean(
-                        "spkBassMonoEnabled",
-                        state.spkBassMonoEnabled
-                    ),
-                    spkBassMonoMode = obj.optInt("spkBassMonoMode", state.spkBassMonoMode),
-                    spkBassMonoFrequency = obj.optInt(
-                        "spkBassMonoFrequency",
-                        state.spkBassMonoFrequency
-                    ),
-                    spkBassMonoGain = obj.optInt("spkBassMonoGain", state.spkBassMonoGain),
-                    spkBassMonoAntiPop = obj.optBoolean(
-                        "spkBassMonoAntiPop",
-                        state.spkBassMonoAntiPop
-                    ),
-                    spkClarityEnabled = obj.optBoolean(
-                        "spkClarityEnabled",
-                        state.spkClarityEnabled
-                    ),
-                    spkClarityMode = obj.optInt("spkClarityMode", state.spkClarityMode),
-                    spkClarityGain = obj.optInt("spkClarityGain", state.spkClarityGain),
-                    spkCureEnabled = obj.optBoolean("spkCureEnabled", state.spkCureEnabled),
-                    spkCureStrength = obj.optInt("spkCureStrength", state.spkCureStrength),
-                    spkAnalogxEnabled = obj.optBoolean(
-                        "spkAnalogxEnabled",
-                        state.spkAnalogxEnabled
-                    ),
-                    spkAnalogxMode = obj.optInt("spkAnalogxMode", state.spkAnalogxMode),
-                    spkChannelPan = obj.optInt("spkChannelPan", state.spkChannelPan)
-                )
-            }
+            deserializeEffectPrefs(obj, state, isSpk)
         }
     }
 
     private fun saveAndDispatchInt(prefKey: String, param: Int, value: Int) {
         viewModelScope.launch { repository.setIntPreference(prefKey, value) }
         if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) dispatchInt(param, value)
-    }
-
-    private fun saveAndDispatchBool(prefKey: String, param: Int, value: Boolean) {
-        viewModelScope.launch { repository.setBooleanPreference(prefKey, value) }
-        if (activeDeviceType == ViperParams.FX_TYPE_HEADPHONE) dispatchInt(
-            param,
-            if (value) 1 else 0
-        )
     }
 
     private fun saveAndDispatchFetBool(prefKey: String, param: Int, value: Boolean) {
@@ -5491,11 +3713,6 @@ class MainViewModel @Inject constructor(
     private fun spkSaveAndDispatchInt(prefKey: String, param: Int, value: Int) {
         viewModelScope.launch { repository.setIntPreference(prefKey, value) }
         if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) dispatchInt(param, value)
-    }
-
-    private fun spkSaveAndDispatchBool(prefKey: String, param: Int, value: Boolean) {
-        viewModelScope.launch { repository.setBooleanPreference(prefKey, value) }
-        if (activeDeviceType == ViperParams.FX_TYPE_SPEAKER) dispatchInt(param, if (value) 1 else 0)
     }
 
     private fun spkSaveAndDispatchFetBool(prefKey: String, param: Int, value: Boolean) {

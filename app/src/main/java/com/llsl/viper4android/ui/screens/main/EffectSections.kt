@@ -154,23 +154,23 @@ fun PlaybackGainSection(state: MainUiState, viewModel: MainViewModel, isSpkMode:
 
 @Composable
 fun FetCompressorSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
-    val fetEnabled = if (isSpkMode) state.spkFetEnabled else state.fetEnabled
-    val fetThreshold = if (isSpkMode) state.spkFetThreshold else state.fetThreshold
-    val fetRatio = if (isSpkMode) state.spkFetRatio else state.fetRatio
-    val fetAutoKnee = if (isSpkMode) state.spkFetAutoKnee else state.fetAutoKnee
-    val fetKnee = if (isSpkMode) state.spkFetKnee else state.fetKnee
-    val fetKneeMulti = if (isSpkMode) state.spkFetKneeMulti else state.fetKneeMulti
-    val fetAutoGain = if (isSpkMode) state.spkFetAutoGain else state.fetAutoGain
-    val fetGain = if (isSpkMode) state.spkFetGain else state.fetGain
-    val fetAutoAttack = if (isSpkMode) state.spkFetAutoAttack else state.fetAutoAttack
-    val fetAttack = if (isSpkMode) state.spkFetAttack else state.fetAttack
-    val fetMaxAttack = if (isSpkMode) state.spkFetMaxAttack else state.fetMaxAttack
-    val fetAutoRelease = if (isSpkMode) state.spkFetAutoRelease else state.fetAutoRelease
-    val fetRelease = if (isSpkMode) state.spkFetRelease else state.fetRelease
-    val fetMaxRelease = if (isSpkMode) state.spkFetMaxRelease else state.fetMaxRelease
-    val fetCrest = if (isSpkMode) state.spkFetCrest else state.fetCrest
-    val fetAdapt = if (isSpkMode) state.spkFetAdapt else state.fetAdapt
-    val fetNoClip = if (isSpkMode) state.spkFetNoClip else state.fetNoClip
+    val enabled = if (isSpkMode) state.spkFetEnabled else state.fetEnabled
+    val threshold = if (isSpkMode) state.spkFetThreshold else state.fetThreshold
+    val ratio = if (isSpkMode) state.spkFetRatio else state.fetRatio
+    val autoKnee = if (isSpkMode) state.spkFetAutoKnee else state.fetAutoKnee
+    val knee = if (isSpkMode) state.spkFetKnee else state.fetKnee
+    val kneeMulti = if (isSpkMode) state.spkFetKneeMulti else state.fetKneeMulti
+    val autoGain = if (isSpkMode) state.spkFetAutoGain else state.fetAutoGain
+    val gain = if (isSpkMode) state.spkFetGain else state.fetGain
+    val autoAttack = if (isSpkMode) state.spkFetAutoAttack else state.fetAutoAttack
+    val attack = if (isSpkMode) state.spkFetAttack else state.fetAttack
+    val maxAttack = if (isSpkMode) state.spkFetMaxAttack else state.fetMaxAttack
+    val autoRelease = if (isSpkMode) state.spkFetAutoRelease else state.fetAutoRelease
+    val release = if (isSpkMode) state.spkFetRelease else state.fetRelease
+    val maxRelease = if (isSpkMode) state.spkFetMaxRelease else state.fetMaxRelease
+    val crest = if (isSpkMode) state.spkFetCrest else state.fetCrest
+    val adapt = if (isSpkMode) state.spkFetAdapt else state.fetAdapt
+    val noClip = if (isSpkMode) state.spkFetNoClip else state.fetNoClip
 
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkFetEnabled else viewModel::setFetEnabled
@@ -209,103 +209,103 @@ fun FetCompressorSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
 
     EffectSection(
         title = stringResource(R.string.section_fet_compressor),
-        enabled = fetEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.Compress
     ) {
         LabeledSlider(
             label = stringResource(R.string.label_fet_threshold),
-            value = fetThreshold.toFloat(),
+            value = threshold.toFloat(),
             onValueChange = { onThresholdChange(it.roundToInt()) },
             valueRange = 0f..200f
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_ratio),
-            value = fetRatio.toFloat(),
+            value = ratio.toFloat(),
             onValueChange = { onRatioChange(it.roundToInt()) },
             valueRange = 0f..200f
         )
         LabeledSwitch(
             label = stringResource(R.string.label_fet_auto_knee),
-            checked = fetAutoKnee,
+            checked = autoKnee,
             onCheckedChange = onAutoKneeChange
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_knee),
-            value = fetKnee.toFloat(),
+            value = knee.toFloat(),
             onValueChange = { onKneeChange(it.roundToInt()) },
             valueRange = 0f..200f,
-            enabled = !fetAutoKnee
+            enabled = !autoKnee
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_knee_multi),
-            value = fetKneeMulti.toFloat(),
+            value = kneeMulti.toFloat(),
             onValueChange = { onKneeMultiChange(it.roundToInt()) },
             valueRange = 0f..200f
         )
         LabeledSwitch(
             label = stringResource(R.string.label_fet_auto_gain),
-            checked = fetAutoGain,
+            checked = autoGain,
             onCheckedChange = onAutoGainChange
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_gain),
-            value = fetGain.toFloat(),
+            value = gain.toFloat(),
             onValueChange = { onGainChange(it.roundToInt()) },
             valueRange = 0f..200f,
-            enabled = !fetAutoGain
+            enabled = !autoGain
         )
         LabeledSwitch(
             label = stringResource(R.string.label_fet_auto_attack),
-            checked = fetAutoAttack,
+            checked = autoAttack,
             onCheckedChange = onAutoAttackChange
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_attack),
-            value = fetAttack.toFloat(),
+            value = attack.toFloat(),
             onValueChange = { onAttackChange(it.roundToInt()) },
             valueRange = 0f..200f,
-            enabled = !fetAutoAttack
+            enabled = !autoAttack
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_max_attack),
-            value = fetMaxAttack.toFloat(),
+            value = maxAttack.toFloat(),
             onValueChange = { onMaxAttackChange(it.roundToInt()) },
             valueRange = 0f..200f
         )
         LabeledSwitch(
             label = stringResource(R.string.label_fet_auto_release),
-            checked = fetAutoRelease,
+            checked = autoRelease,
             onCheckedChange = onAutoReleaseChange
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_release),
-            value = fetRelease.toFloat(),
+            value = release.toFloat(),
             onValueChange = { onReleaseChange(it.roundToInt()) },
             valueRange = 0f..200f,
-            enabled = !fetAutoRelease
+            enabled = !autoRelease
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_max_release),
-            value = fetMaxRelease.toFloat(),
+            value = maxRelease.toFloat(),
             onValueChange = { onMaxReleaseChange(it.roundToInt()) },
             valueRange = 0f..200f
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_crest),
-            value = fetCrest.toFloat(),
+            value = crest.toFloat(),
             onValueChange = { onCrestChange(it.roundToInt()) },
             valueRange = 0f..300f
         )
         LabeledSlider(
             label = stringResource(R.string.label_fet_adapt),
-            value = fetAdapt.toFloat(),
+            value = adapt.toFloat(),
             onValueChange = { onAdaptChange(it.roundToInt()) },
             valueRange = 0f..200f
         )
         LabeledSwitch(
             label = stringResource(R.string.label_fet_no_clip),
-            checked = fetNoClip,
+            checked = noClip,
             onCheckedChange = onNoClipChange
         )
     }
@@ -313,27 +313,27 @@ fun FetCompressorSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
 
 @Composable
 fun DdcSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
-    val ddcEnabled = if (isSpkMode) state.spkDdcEnabled else state.ddcEnabled
-    val ddcDevice = if (isSpkMode) state.spkDdcDevice else state.ddcDevice
+    val enabled = if (isSpkMode) state.spkDdcEnabled else state.ddcEnabled
+    val device = if (isSpkMode) state.spkDdcDevice else state.ddcDevice
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkDdcEnabled else viewModel::setDdcEnabled
     val onDeviceChange: (String) -> Unit =
         if (isSpkMode) viewModel::setSpkDdcDevice else viewModel::setDdcDevice
 
     val vdcFiles by viewModel.vdcFileList.collectAsStateWithLifecycle()
-    val noneLabel = stringResource(R.string.label_ddc_none)
-    val ddcOptions = listOf(noneLabel) + vdcFiles
+    val vdcNoneLabel = stringResource(R.string.label_ddc_none)
+    val cdvOptions = listOf(vdcNoneLabel) + vdcFiles
 
     EffectSection(
         title = stringResource(R.string.section_ddc),
-        enabled = ddcEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.Tune
     ) {
         LabeledDropdown(
             label = stringResource(R.string.label_ddc_device),
-            selectedValue = ddcDevice.ifEmpty { noneLabel },
-            options = ddcOptions,
+            selectedValue = device.ifEmpty { vdcNoneLabel },
+            options = cdvOptions,
             onOptionSelected = { index, value ->
                 onDeviceChange(if (index == 0) "" else value)
             },
@@ -348,9 +348,9 @@ fun SpectrumExtensionSection(
     viewModel: MainViewModel,
     isSpkMode: Boolean = false
 ) {
-    val vseEnabled = if (isSpkMode) state.spkVseEnabled else state.vseEnabled
-    val vseStrength = if (isSpkMode) state.spkVseStrength else state.vseStrength
-    val vseExciter = if (isSpkMode) state.spkVseExciter else state.vseExciter
+    val enabled = if (isSpkMode) state.spkVseEnabled else state.vseEnabled
+    val strength = if (isSpkMode) state.spkVseStrength else state.vseStrength
+    val exciter = if (isSpkMode) state.spkVseExciter else state.vseExciter
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkVseEnabled else viewModel::setVseEnabled
     val onStrengthChange: (Int) -> Unit =
@@ -360,33 +360,33 @@ fun SpectrumExtensionSection(
 
     EffectSection(
         title = stringResource(R.string.section_spectrum_extension),
-        enabled = vseEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.Waves
     ) {
         LabeledSlider(
             label = stringResource(R.string.label_vse_strength),
-            value = vseStrength.toFloat(),
+            value = strength.toFloat(),
             onValueChange = { onStrengthChange(it.roundToInt()) },
             valueRange = 0f..10f,
             steps = 9,
-            valueLabel = "$vseStrength"
+            valueLabel = "$strength"
         )
         LabeledSlider(
             label = stringResource(R.string.label_vse_exciter),
-            value = vseExciter.toFloat(),
+            value = exciter.toFloat(),
             onValueChange = { onExciterChange(it.roundToInt()) },
             valueRange = 0f..100f,
-            valueLabel = "${vseExciter}%"
+            valueLabel = "${exciter}%"
         )
     }
 }
 
 @Composable
 fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
-    val eqEnabled = if (isSpkMode) state.spkEqEnabled else state.eqEnabled
-    val eqBandCount = if (isSpkMode) state.spkEqBandCount else state.eqBandCount
-    val eqPresetId = if (isSpkMode) state.spkEqPresetId else state.eqPresetId
+    val enabled = if (isSpkMode) state.spkEqEnabled else state.eqEnabled
+    val bandCount = if (isSpkMode) state.spkEqBandCount else state.eqBandCount
+    val presetId = if (isSpkMode) state.spkEqPresetId else state.eqPresetId
     val eqBands = if (isSpkMode) state.spkEqBands else state.eqBands
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkEqEnabled else viewModel::setEqEnabled
@@ -409,7 +409,7 @@ fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
 
     EffectSection(
         title = stringResource(R.string.section_equalizer),
-        enabled = eqEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.Equalizer
     ) {
@@ -417,7 +417,7 @@ fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
 
         val bandCounts = listOf(10, 15, 25, 31)
         val bandCountOptions = bandCounts.map { stringResource(R.string.label_eq_n_bands, it) }
-        val bandCountIndex = when (eqBandCount) {
+        val bandCountIndex = when (bandCount) {
             15 -> 1; 25 -> 2; 31 -> 3; else -> 0
         }
         LabeledDropdown(
@@ -427,11 +427,11 @@ fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
             onOptionSelected = { index, _ -> onBandCountChange(bandCounts[index]) }
         )
 
-        if (bands.size >= eqBandCount) {
+        if (bands.size >= bandCount) {
             EqCurveGraph(
                 bands = bands,
                 onClick = { showEqDialog = true },
-                bandCount = eqBandCount
+                bandCount = bandCount
             )
         }
 
@@ -439,14 +439,14 @@ fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
             EqEditDialog(
                 bands = bands,
                 onBandsChange = onBandsChange,
-                presetId = eqPresetId,
+                presetId = presetId,
                 presets = eqPresets,
                 onPresetSelect = onPresetSelect,
                 onPresetAdd = onPresetAdd,
                 onPresetDelete = onPresetDelete,
                 onReset = onReset,
                 onDismiss = { showEqDialog = false },
-                bandCount = eqBandCount
+                bandCount = bandCount
             )
         }
     }
@@ -454,9 +454,9 @@ fun EqualizerSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
 
 @Composable
 fun ConvolverSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
-    val convolverEnabled = if (isSpkMode) state.spkConvolverEnabled else state.convolverEnabled
-    val convolverKernel = if (isSpkMode) state.spkConvolverKernel else state.convolverKernel
-    val convolverCrossChannel =
+    val enabled = if (isSpkMode) state.spkConvolverEnabled else state.convolverEnabled
+    val kernel = if (isSpkMode) state.spkConvolverKernel else state.convolverKernel
+    val crossChannel =
         if (isSpkMode) state.spkConvolverCrossChannel else state.convolverCrossChannel
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkConvolverEnabled else viewModel::setConvolverEnabled
@@ -471,13 +471,13 @@ fun ConvolverSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
 
     EffectSection(
         title = stringResource(R.string.section_convolver),
-        enabled = convolverEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.GraphicEq
     ) {
         LabeledDropdown(
             label = stringResource(R.string.label_convolver_kernel),
-            selectedValue = convolverKernel.ifEmpty { kernelNoneLabel },
+            selectedValue = kernel.ifEmpty { kernelNoneLabel },
             options = kernelOptions,
             onOptionSelected = { index, value ->
                 onKernelChange(if (index == 0) "" else value)
@@ -486,7 +486,7 @@ fun ConvolverSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
         )
         LabeledSlider(
             label = stringResource(R.string.label_convolver_cross_channel),
-            value = convolverCrossChannel.toFloat(),
+            value = crossChannel.toFloat(),
             onValueChange = { onCrossChannelChange(it.roundToInt()) },
             valueRange = 0f..100f
         )
@@ -856,11 +856,11 @@ fun TubeSimulatorSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
 
 @Composable
 fun ViperBassSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
-    val bassEnabled = if (isSpkMode) state.spkBassEnabled else state.bassEnabled
-    val bassMode = if (isSpkMode) state.spkBassMode else state.bassMode
-    val bassFrequency = if (isSpkMode) state.spkBassFrequency else state.bassFrequency
-    val bassGain = if (isSpkMode) state.spkBassGain else state.bassGain
-    val bassAntiPop = if (isSpkMode) state.spkBassAntiPop else state.bassAntiPop
+    val enabled = if (isSpkMode) state.spkBassEnabled else state.bassEnabled
+    val mode = if (isSpkMode) state.spkBassMode else state.bassMode
+    val frequency = if (isSpkMode) state.spkBassFrequency else state.bassFrequency
+    val gain = if (isSpkMode) state.spkBassGain else state.bassGain
+    val antiPop = if (isSpkMode) state.spkBassAntiPop else state.bassAntiPop
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkBassEnabled else viewModel::setBassEnabled
     val onModeChange: (Int) -> Unit =
@@ -880,42 +880,42 @@ fun ViperBassSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
 
     EffectSection(
         title = stringResource(R.string.section_viper_bass),
-        enabled = bassEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.GraphicEq
     ) {
         LabeledDropdown(
             label = stringResource(R.string.label_bass_mode),
-            selectedValue = modeNames.getOrElse(bassMode) { modeNames[0] },
+            selectedValue = modeNames.getOrElse(mode) { modeNames[0] },
             options = modeNames,
             onOptionSelected = { index, _ -> onModeChange(index) }
         )
-        if (bassMode != 2) {
+        if (mode != 2) {
             LabeledSlider(
                 label = stringResource(R.string.label_bass_frequency),
-                value = bassFrequency.toFloat(),
+                value = frequency.toFloat(),
                 onValueChange = { onFrequencyChange(it.roundToInt()) },
                 valueRange = 0f..135f,
-                valueLabel = "${bassFrequency + 15}Hz"
+                valueLabel = "${frequency + 15}Hz"
             )
         }
         LabeledSlider(
             label = stringResource(R.string.label_bass_gain),
-            value = bassGain.toFloat(),
+            value = gain.toFloat(),
             onValueChange = { onGainChange(it.roundToInt()) },
             valueRange = 0f..19f,
             steps = 18,
             valueLabel = "${
-                if (bassMode == 2) {
-                    MainViewModel.BASS_SUBWOOFER_GAIN_DB_LABELS.getOrElse(bassGain) { "--" }
+                if (mode == 2) {
+                    MainViewModel.BASS_SUBWOOFER_GAIN_DB_LABELS.getOrElse(gain) { "--" }
                 } else {
-                    MainViewModel.BASS_GAIN_DB_LABELS.getOrElse(bassGain) { "--" }
+                    MainViewModel.BASS_GAIN_DB_LABELS.getOrElse(gain) { "--" }
                 }
             }dB"
         )
         LabeledSwitch(
             label = stringResource(R.string.label_bass_anti_pop),
-            checked = bassAntiPop,
+            checked = antiPop,
             onCheckedChange = onAntiPopChange
         )
     }
@@ -990,9 +990,9 @@ fun ViperBassMonoSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
 
 @Composable
 fun ViperClaritySection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
-    val clarityEnabled = if (isSpkMode) state.spkClarityEnabled else state.clarityEnabled
-    val clarityMode = if (isSpkMode) state.spkClarityMode else state.clarityMode
-    val clarityGain = if (isSpkMode) state.spkClarityGain else state.clarityGain
+    val enabled = if (isSpkMode) state.spkClarityEnabled else state.clarityEnabled
+    val mode = if (isSpkMode) state.spkClarityMode else state.clarityMode
+    val gain = if (isSpkMode) state.spkClarityGain else state.clarityGain
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkClarityEnabled else viewModel::setClarityEnabled
     val onModeChange: (Int) -> Unit =
@@ -1008,26 +1008,26 @@ fun ViperClaritySection(state: MainUiState, viewModel: MainViewModel, isSpkMode:
 
     EffectSection(
         title = stringResource(R.string.section_viper_clarity),
-        enabled = clarityEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.Hearing
     ) {
         LabeledDropdown(
             label = stringResource(R.string.label_clarity_mode),
-            selectedValue = modeNames.getOrElse(clarityMode) { modeNames[0] },
+            selectedValue = modeNames.getOrElse(mode) { modeNames[0] },
             options = modeNames,
             onOptionSelected = { index, _ -> onModeChange(index) }
         )
         LabeledSlider(
             label = stringResource(R.string.label_clarity_gain),
-            value = clarityGain.toFloat(),
+            value = gain.toFloat(),
             onValueChange = { onGainChange(it.roundToInt()) },
             valueRange = 0f..9f,
             steps = 8,
             valueLabel = "${
-                MainViewModel.CLARITY_GAIN_DB_LABELS.getOrElse(clarityGain) {
+                MainViewModel.CLARITY_GAIN_DB_LABELS.getOrElse(gain) {
                     "%.1f".format(
-                        clarityGain * 0.5
+                        gain * 0.5
                     )
                 }
             }dB"
@@ -1041,8 +1041,8 @@ fun AuditoryProtectionSection(
     viewModel: MainViewModel,
     isSpkMode: Boolean = false
 ) {
-    val cureEnabled = if (isSpkMode) state.spkCureEnabled else state.cureEnabled
-    val cureStrength = if (isSpkMode) state.spkCureStrength else state.cureStrength
+    val enabled = if (isSpkMode) state.spkCureEnabled else state.cureEnabled
+    val strength = if (isSpkMode) state.spkCureStrength else state.cureStrength
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkCureEnabled else viewModel::setCureEnabled
     val onStrengthChange: (Int) -> Unit =
@@ -1056,13 +1056,13 @@ fun AuditoryProtectionSection(
 
     EffectSection(
         title = stringResource(R.string.section_cure),
-        enabled = cureEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.HealthAndSafety
     ) {
         LabeledDropdown(
             label = stringResource(R.string.label_cure_strength),
-            selectedValue = strengthNames.getOrElse(cureStrength) { strengthNames[0] },
+            selectedValue = strengthNames.getOrElse(strength) { strengthNames[0] },
             options = strengthNames,
             onOptionSelected = { index, _ -> onStrengthChange(index) }
         )
@@ -1071,8 +1071,8 @@ fun AuditoryProtectionSection(
 
 @Composable
 fun AnalogXSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
-    val analogxEnabled = if (isSpkMode) state.spkAnalogxEnabled else state.analogxEnabled
-    val analogxMode = if (isSpkMode) state.spkAnalogxMode else state.analogxMode
+    val enabled = if (isSpkMode) state.spkAnalogxEnabled else state.analogxEnabled
+    val mode = if (isSpkMode) state.spkAnalogxMode else state.analogxMode
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkAnalogxEnabled else viewModel::setAnalogxEnabled
     val onModeChange: (Int) -> Unit =
@@ -1086,13 +1086,13 @@ fun AnalogXSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bool
 
     EffectSection(
         title = stringResource(R.string.section_analogx),
-        enabled = analogxEnabled,
+        enabled = enabled,
         onEnabledChange = onEnabledChange,
         icon = Icons.Default.Memory
     ) {
         LabeledDropdown(
             label = stringResource(R.string.label_analogx_mode),
-            selectedValue = modeNames.getOrElse(analogxMode) { modeNames[0] },
+            selectedValue = modeNames.getOrElse(mode) { modeNames[0] },
             options = modeNames,
             onOptionSelected = { index, _ -> onModeChange(index) }
         )

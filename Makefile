@@ -10,13 +10,13 @@ VERSION ?= $(shell grep versionName app/build.gradle.kts | awk -F'"' '{print $$2
 debug:
 	$(GRADLE) assembleDebug
 	@mkdir -p $(APK_DIR)
-	@cp $(OUT_DIR)/debug/app-debug.apk $(APK_DIR)/debug/ViPER4Android-$(VERSION)-debug.apk
+	@cp $(OUT_DIR)/debug/app-debug.apk $(APK_DIR)/ViPER4Android-$(VERSION)-debug.apk
 	@echo "APK: $(APK_DIR)/ViPER4Android-$(VERSION)-debug.apk"
 
 release:
 	$(GRADLE) assembleRelease
 	@mkdir -p $(APK_DIR)
-	@cp $(OUT_DIR)/release/app-release.apk $(APK_DIR)/release/ViPER4Android-$(VERSION).apk
+	@cp $(OUT_DIR)/release/app-release.apk $(APK_DIR)/ViPER4Android-$(VERSION).apk
 	@echo "APK: $(APK_DIR)/ViPER4Android-$(VERSION).apk"
 
 lint:
@@ -27,7 +27,7 @@ check:
 
 clean:
 	$(GRADLE) clean
-	$(rm -rf $(APK_DIR))
+	@rm -rf $(APK_DIR)
 
 help:
 	@echo "ViPER4Android APK Build System"
