@@ -51,8 +51,9 @@ data class DriverStatus(
 )
 
 data class MainUiState(
-    val masterEnabled: Boolean = false,
     val fxType: Int = ViperParams.FX_TYPE_HEADPHONE,
+
+    val masterEnabled: Boolean = false,
 
     val outputVolume: Int = 11,
     val channelPan: Int = 0,
@@ -153,12 +154,52 @@ data class MainUiState(
     val analogxEnabled: Boolean = false,
     val analogxMode: Int = 0,
 
+    val spkMasterEnabled: Boolean = false,
+
+    val spkOutputVolume: Int = 11,
+    val spkChannelPan: Int = 0,
+    val spkLimiter: Int = 5,
+
+    val spkAgcEnabled: Boolean = false,
+    val spkAgcStrength: Int = 0,
+    val spkAgcMaxGain: Int = 3,
+    val spkAgcOutputThreshold: Int = 3,
+
+    val spkFetEnabled: Boolean = false,
+    val spkFetThreshold: Int = 100,
+    val spkFetRatio: Int = 100,
+    val spkFetAutoKnee: Boolean = true,
+    val spkFetKnee: Int = 0,
+    val spkFetKneeMulti: Int = 0,
+    val spkFetAutoGain: Boolean = true,
+    val spkFetGain: Int = 0,
+    val spkFetAutoAttack: Boolean = true,
+    val spkFetAttack: Int = 20,
+    val spkFetMaxAttack: Int = 80,
+    val spkFetAutoRelease: Boolean = true,
+    val spkFetRelease: Int = 50,
+    val spkFetMaxRelease: Int = 100,
+    val spkFetCrest: Int = 100,
+    val spkFetAdapt: Int = 50,
+    val spkFetNoClip: Boolean = true,
+
     val spkDdcEnabled: Boolean = false,
     val spkDdcDevice: String = "",
 
     val spkVseEnabled: Boolean = false,
     val spkVseStrength: Int = 10,
     val spkVseExciter: Int = 0,
+
+    val spkEqEnabled: Boolean = false,
+    val spkEqBandCount: Int = 10,
+    val spkEqPresetId: Long? = null,
+    val spkEqBands: String = "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;",
+    val spkEqBandsMap: Map<Int, String> = mapOf(10 to "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;"),
+    val spkEqPresets: List<EqPreset> = emptyList(),
+
+    val spkConvolverEnabled: Boolean = false,
+    val spkConvolverKernel: String = "",
+    val spkConvolverCrossChannel: Int = 0,
 
     val spkFieldSurroundEnabled: Boolean = false,
     val spkFieldSurroundWidening: Int = 0,
@@ -170,6 +211,13 @@ data class MainUiState(
 
     val spkVheEnabled: Boolean = false,
     val spkVheQuality: Int = 0,
+
+    val spkReverbEnabled: Boolean = false,
+    val spkReverbRoomSize: Int = 0,
+    val spkReverbWidth: Int = 0,
+    val spkReverbDampening: Int = 0,
+    val spkReverbWet: Int = 0,
+    val spkReverbDry: Int = 50,
 
     val spkDynamicSystemEnabled: Boolean = false,
     val spkDynamicSystemDevice: Int = 0,
@@ -207,54 +255,7 @@ data class MainUiState(
     val spkAnalogxEnabled: Boolean = false,
     val spkAnalogxMode: Int = 0,
 
-    val spkChannelPan: Int = 0,
-
-    val spkMasterEnabled: Boolean = false,
     val speakerOptEnabled: Boolean = false,
-
-    val spkConvolverEnabled: Boolean = false,
-    val spkConvolverKernel: String = "",
-    val spkConvolverCrossChannel: Int = 0,
-
-    val spkEqEnabled: Boolean = false,
-    val spkEqBandCount: Int = 10,
-    val spkEqPresetId: Long? = null,
-    val spkEqBands: String = "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;",
-    val spkEqBandsMap: Map<Int, String> = mapOf(10 to "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;"),
-    val spkEqPresets: List<EqPreset> = emptyList(),
-
-    val spkReverbEnabled: Boolean = false,
-    val spkReverbRoomSize: Int = 0,
-    val spkReverbWidth: Int = 0,
-    val spkReverbDampening: Int = 0,
-    val spkReverbWet: Int = 0,
-    val spkReverbDry: Int = 50,
-
-    val spkAgcEnabled: Boolean = false,
-    val spkAgcStrength: Int = 0,
-    val spkAgcMaxGain: Int = 3,
-    val spkAgcOutputThreshold: Int = 3,
-
-    val spkFetEnabled: Boolean = false,
-    val spkFetThreshold: Int = 100,
-    val spkFetRatio: Int = 100,
-    val spkFetAutoKnee: Boolean = true,
-    val spkFetKnee: Int = 0,
-    val spkFetKneeMulti: Int = 0,
-    val spkFetAutoGain: Boolean = true,
-    val spkFetGain: Int = 0,
-    val spkFetAutoAttack: Boolean = true,
-    val spkFetAttack: Int = 20,
-    val spkFetMaxAttack: Int = 80,
-    val spkFetAutoRelease: Boolean = true,
-    val spkFetRelease: Int = 50,
-    val spkFetMaxRelease: Int = 100,
-    val spkFetCrest: Int = 100,
-    val spkFetAdapt: Int = 50,
-    val spkFetNoClip: Boolean = true,
-
-    val spkOutputVolume: Int = 11,
-    val spkLimiter: Int = 5
 )
 
 @HiltViewModel
