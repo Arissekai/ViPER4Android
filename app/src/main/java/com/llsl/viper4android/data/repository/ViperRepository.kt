@@ -81,5 +81,9 @@ class ViperRepository @Inject constructor(
     companion object {
         const val PREF_FX_TYPE = "fx_type"
         const val PREF_MASTER_ENABLE = "master_enable"
+        const val PREF_DDC_DEVICE = "ddc_device"
+        const val PREF_EQ_PRESET_ID = "eq_preset_id"
+        const val PERF_DYNAMIC_SYS_DEVICE = "ds_device"
+        const val PERF_DYNAMIC_SYS_PRESET_ID = "ds_preset_id"
     }
 }
