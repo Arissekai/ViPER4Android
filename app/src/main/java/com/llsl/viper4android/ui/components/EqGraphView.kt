@@ -223,11 +223,17 @@ fun EqCurveGraph(
 
 private fun buildSplinePath(points: List<Offset>): Path {
     val path = Path()
-    if (points.isEmpty()) return path
-
-    path.moveTo(points[0].x, points[0].y)
     val n = points.size
+    if (n == 0) return path
+    path.moveTo(points[0].x, points[0].y)
+    if (n == 1) return path
+    if (n == 2) {
+        path.lineTo(points[1].x, points[1].y)
+        return path
+    }
+
     val tension = 0.3f
+    val damping = 0.15f
 
     for (i in 0 until n - 1) {
         val prev = points[max(0, i - 1)]
@@ -235,10 +241,20 @@ private fun buildSplinePath(points: List<Offset>): Path {
         val next = points[i + 1]
         val afterNext = points[min(n - 1, i + 2)]
 
-        val cp1x = curr.x + (next.x - prev.x) * tension
-        val cp1y = curr.y + (next.y - prev.y) * tension
-        val cp2x = next.x - (afterNext.x - curr.x) * tension
-        val cp2y = next.y - (afterNext.y - curr.y) * tension
+        var t1 = tension
+        val isLocalMax = curr.y <= prev.y && curr.y <= next.y
+        val isLocalMin = curr.y >= prev.y && curr.y >= next.y
+        if (isLocalMax || isLocalMin) t1 = damping
+
+        var t2 = tension
+        val isNextLocalMax = next.y <= curr.y && next.y <= afterNext.y
+        val isNextLocalMin = next.y >= curr.y && next.y >= afterNext.y
+        if (isNextLocalMax || isNextLocalMin) t2 = damping
+
+        val cp1x = curr.x + (next.x - prev.x) * t1
+        val cp1y = curr.y + (next.y - prev.y) * t1
+        val cp2x = next.x - (afterNext.x - curr.x) * t2
+        val cp2y = next.y - (afterNext.y - curr.y) * t2
 
         path.cubicTo(cp1x, cp1y, cp2x, cp2y, next.x, next.y)
     }
