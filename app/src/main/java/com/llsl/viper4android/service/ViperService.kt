@@ -799,6 +799,38 @@ class ViperService : LifecycleService() {
             )
         )
         params.add(ParamEntry(ViperParams.PARAM_HP_BASS_GAIN, intArrayOf(state.bassGain * 50 + 50)))
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_HP_BASS_ANTI_POP,
+                intArrayOf(if (state.bassAntiPop) 1 else 0)
+            )
+        )
+
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_HP_BASS_MONO_ENABLE,
+                intArrayOf(if (state.bassMonoEnabled) 1 else 0)
+            )
+        )
+        params.add(ParamEntry(ViperParams.PARAM_HP_BASS_MONO_MODE, intArrayOf(state.bassMonoMode)))
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_HP_BASS_MONO_FREQUENCY,
+                intArrayOf(state.bassMonoFrequency + 15)
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_HP_BASS_MONO_GAIN,
+                intArrayOf(state.bassMonoGain * 50 + 50)
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_HP_BASS_MONO_ANTI_POP,
+                intArrayOf(if (state.bassMonoAntiPop) 1 else 0)
+            )
+        )
 
         params.add(
             ParamEntry(
@@ -1160,6 +1192,43 @@ class ViperService : LifecycleService() {
             ParamEntry(
                 ViperParams.PARAM_SPK_BASS_GAIN,
                 intArrayOf(state.spkBassGain * 50 + 50)
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_SPK_BASS_ANTI_POP,
+                intArrayOf(if (state.spkBassAntiPop) 1 else 0)
+            )
+        )
+
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_SPK_BASS_MONO_ENABLE,
+                intArrayOf(if (state.spkBassMonoEnabled) 1 else 0)
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_SPK_BASS_MONO_MODE,
+                intArrayOf(state.spkBassMonoMode)
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_SPK_BASS_MONO_FREQUENCY,
+                intArrayOf(state.spkBassMonoFrequency + 15)
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_SPK_BASS_MONO_GAIN,
+                intArrayOf(state.spkBassMonoGain * 50 + 50)
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP,
+                intArrayOf(if (state.spkBassMonoAntiPop) 1 else 0)
             )
         )
 

@@ -135,11 +135,13 @@ data class MainUiState(
     val bassMode: Int = 0,
     val bassFrequency: Int = 55,
     val bassGain: Int = 0,
+    val bassAntiPop: Boolean = true,
 
     val bassMonoEnabled: Boolean = false,
     val bassMonoMode: Int = 0,
     val bassMonoFrequency: Int = 55,
     val bassMonoGain: Int = 0,
+    val bassMonoAntiPop: Boolean = true,
 
     val clarityEnabled: Boolean = false,
     val clarityMode: Int = 0,
@@ -187,11 +189,13 @@ data class MainUiState(
     val spkBassMode: Int = 0,
     val spkBassFrequency: Int = 55,
     val spkBassGain: Int = 0,
+    val spkBassAntiPop: Boolean = true,
 
     val spkBassMonoEnabled: Boolean = false,
     val spkBassMonoMode: Int = 0,
     val spkBassMonoFrequency: Int = 55,
     val spkBassMonoGain: Int = 0,
+    val spkBassMonoAntiPop: Boolean = true,
 
     val spkClarityEnabled: Boolean = false,
     val spkClarityMode: Int = 0,
@@ -520,12 +524,17 @@ class MainViewModel @Inject constructor(
         val bassFrequency =
             repository.getIntPreference("${ViperParams.PARAM_HP_BASS_FREQUENCY}", 55).first()
         val bassGain = repository.getIntPreference("${ViperParams.PARAM_HP_BASS_GAIN}", 0).first()
+        val bassAntiPop =
+            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_ANTI_POP}", true).first()
         val bassMonoMode =
             repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_MODE}", 0).first()
         val bassMonoFrequency =
             repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_FREQUENCY}", 55).first()
         val bassMonoGain =
             repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_GAIN}", 0).first()
+        val bassMonoAntiPop =
+            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_MONO_ANTI_POP}", true)
+                .first()
         val clarityMode =
             repository.getIntPreference("${ViperParams.PARAM_HP_CLARITY_MODE}", 0).first()
         val clarityGain =
@@ -675,10 +684,12 @@ class MainViewModel @Inject constructor(
                 bassMode = bassMode,
                 bassFrequency = bassFrequency,
                 bassGain = bassGain,
+                bassAntiPop = bassAntiPop,
                 bassMonoEnabled = bassMonoEnabled,
                 bassMonoMode = bassMonoMode,
                 bassMonoFrequency = bassMonoFrequency,
                 bassMonoGain = bassMonoGain,
+                bassMonoAntiPop = bassMonoAntiPop,
                 clarityEnabled = clarityEnabled,
                 clarityMode = clarityMode,
                 clarityGain = clarityGain,
@@ -757,6 +768,9 @@ class MainViewModel @Inject constructor(
             repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_FREQUENCY}", 55).first()
         val spkBassGain =
             repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_GAIN}", 0).first()
+        val spkBassAntiPop =
+            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_ANTI_POP}", true)
+                .first()
         val spkBassMonoEnabled =
             repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_ENABLE}").first()
         val spkBassMonoMode =
@@ -766,6 +780,9 @@ class MainViewModel @Inject constructor(
                 .first()
         val spkBassMonoGain =
             repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_GAIN}", 0).first()
+        val spkBassMonoAntiPop =
+            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP}", true)
+                .first()
         val spkClarityEnabled =
             repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_CLARITY_ENABLE}").first()
         val spkClarityMode =
@@ -929,10 +946,12 @@ class MainViewModel @Inject constructor(
                 spkBassMode = spkBassMode,
                 spkBassFrequency = spkBassFrequency,
                 spkBassGain = spkBassGain,
+                spkBassAntiPop = spkBassAntiPop,
                 spkBassMonoEnabled = spkBassMonoEnabled,
                 spkBassMonoMode = spkBassMonoMode,
                 spkBassMonoFrequency = spkBassMonoFrequency,
                 spkBassMonoGain = spkBassMonoGain,
+                spkBassMonoAntiPop = spkBassMonoAntiPop,
                 spkClarityEnabled = spkClarityEnabled,
                 spkClarityMode = spkClarityMode,
                 spkClarityGain = spkClarityGain,
@@ -2098,7 +2117,11 @@ class MainViewModel @Inject constructor(
                         ViperParams.PARAM_HP_BASS_FREQUENCY,
                         intArrayOf(s.bassFrequency + 15)
                     ),
-                    ParamEntry(ViperParams.PARAM_HP_BASS_GAIN, intArrayOf(s.bassGain * 50 + 50))
+                    ParamEntry(ViperParams.PARAM_HP_BASS_GAIN, intArrayOf(s.bassGain * 50 + 50)),
+                    ParamEntry(
+                        ViperParams.PARAM_HP_BASS_ANTI_POP,
+                        intArrayOf(if (s.bassAntiPop) 1 else 0)
+                    )
                 )
             )
         }
@@ -2130,6 +2153,14 @@ class MainViewModel @Inject constructor(
         }; hpDispatchInt(ViperParams.PARAM_HP_BASS_GAIN, v * 50 + 50)
     }
 
+    fun setBassAntiPop(enabled: Boolean) {
+        _uiState.update { it.copy(bassAntiPop = enabled) }
+        viewModelScope.launch {
+            repository.setBooleanPreference("${ViperParams.PARAM_HP_BASS_ANTI_POP}", enabled)
+        }
+        hpDispatchInt(ViperParams.PARAM_HP_BASS_ANTI_POP, if (enabled) 1 else 0)
+    }
+
     fun setBassMonoEnabled(enabled: Boolean) {
         FileLogger.i("ViewModel", "Bass Mono: ${if (enabled) "ON" else "OFF"}")
         _uiState.update { it.copy(bassMonoEnabled = enabled) }
@@ -2152,6 +2183,10 @@ class MainViewModel @Inject constructor(
                     ParamEntry(
                         ViperParams.PARAM_HP_BASS_MONO_GAIN,
                         intArrayOf(s.bassMonoGain * 50 + 50)
+                    ),
+                    ParamEntry(
+                        ViperParams.PARAM_HP_BASS_MONO_ANTI_POP,
+                        intArrayOf(if (s.bassMonoAntiPop) 1 else 0)
                     )
                 )
             )
@@ -2182,6 +2217,14 @@ class MainViewModel @Inject constructor(
                 v
             )
         }; hpDispatchInt(ViperParams.PARAM_HP_BASS_MONO_GAIN, v * 50 + 50)
+    }
+
+    fun setBassMonoAntiPop(enabled: Boolean) {
+        _uiState.update { it.copy(bassMonoAntiPop = enabled) }
+        viewModelScope.launch {
+            repository.setBooleanPreference("${ViperParams.PARAM_HP_BASS_MONO_ANTI_POP}", enabled)
+        }
+        hpDispatchInt(ViperParams.PARAM_HP_BASS_MONO_ANTI_POP, if (enabled) 1 else 0)
     }
 
     fun setClarityEnabled(enabled: Boolean) {
@@ -3247,7 +3290,14 @@ class MainViewModel @Inject constructor(
                         ViperParams.PARAM_SPK_BASS_FREQUENCY,
                         intArrayOf(s.spkBassFrequency + 15)
                     ),
-                    ParamEntry(ViperParams.PARAM_SPK_BASS_GAIN, intArrayOf(s.spkBassGain * 50 + 50))
+                    ParamEntry(
+                        ViperParams.PARAM_SPK_BASS_GAIN,
+                        intArrayOf(s.spkBassGain * 50 + 50)
+                    ),
+                    ParamEntry(
+                        ViperParams.PARAM_SPK_BASS_ANTI_POP,
+                        intArrayOf(if (s.spkBassAntiPop) 1 else 0)
+                    )
                 )
             )
         }
@@ -3279,6 +3329,14 @@ class MainViewModel @Inject constructor(
         }; spkDispatchInt(ViperParams.PARAM_SPK_BASS_GAIN, v * 50 + 50)
     }
 
+    fun setSpkBassAntiPop(enabled: Boolean) {
+        _uiState.update { it.copy(spkBassAntiPop = enabled) }
+        viewModelScope.launch {
+            repository.setBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_ANTI_POP}", enabled)
+        }
+        spkDispatchInt(ViperParams.PARAM_SPK_BASS_ANTI_POP, if (enabled) 1 else 0)
+    }
+
     fun setSpkBassMonoEnabled(enabled: Boolean) {
         FileLogger.i("ViewModel", "[Spk] Bass Mono: ${if (enabled) "ON" else "OFF"}")
         _uiState.update { it.copy(spkBassMonoEnabled = enabled) }
@@ -3304,6 +3362,10 @@ class MainViewModel @Inject constructor(
                     ParamEntry(
                         ViperParams.PARAM_SPK_BASS_MONO_GAIN,
                         intArrayOf(s.spkBassMonoGain * 50 + 50)
+                    ),
+                    ParamEntry(
+                        ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP,
+                        intArrayOf(if (s.spkBassMonoAntiPop) 1 else 0)
                     )
                 )
             )
@@ -3334,6 +3396,17 @@ class MainViewModel @Inject constructor(
                 v
             )
         }; spkDispatchInt(ViperParams.PARAM_SPK_BASS_MONO_GAIN, v * 50 + 50)
+    }
+
+    fun setSpkBassMonoAntiPop(enabled: Boolean) {
+        _uiState.update { it.copy(spkBassMonoAntiPop = enabled) }
+        viewModelScope.launch {
+            repository.setBooleanPreference(
+                "spk_${ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP}",
+                enabled
+            )
+        }
+        spkDispatchInt(ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP, if (enabled) 1 else 0)
     }
 
     fun setSpkClarityEnabled(enabled: Boolean) {
@@ -3938,6 +4011,7 @@ class MainViewModel @Inject constructor(
         repository.setIntPreference("${ViperParams.PARAM_HP_BASS_MODE}", s.bassMode)
         repository.setIntPreference("${ViperParams.PARAM_HP_BASS_FREQUENCY}", s.bassFrequency)
         repository.setIntPreference("${ViperParams.PARAM_HP_BASS_GAIN}", s.bassGain)
+        repository.setBooleanPreference("${ViperParams.PARAM_HP_BASS_ANTI_POP}", s.bassAntiPop)
         repository.setBooleanPreference(
             "${ViperParams.PARAM_HP_BASS_MONO_ENABLE}",
             s.bassMonoEnabled
@@ -3948,6 +4022,10 @@ class MainViewModel @Inject constructor(
             s.bassMonoFrequency
         )
         repository.setIntPreference("${ViperParams.PARAM_HP_BASS_MONO_GAIN}", s.bassMonoGain)
+        repository.setBooleanPreference(
+            "${ViperParams.PARAM_HP_BASS_MONO_ANTI_POP}",
+            s.bassMonoAntiPop
+        )
         repository.setBooleanPreference("${ViperParams.PARAM_HP_CLARITY_ENABLE}", s.clarityEnabled)
         repository.setIntPreference("${ViperParams.PARAM_HP_CLARITY_MODE}", s.clarityMode)
         repository.setIntPreference("${ViperParams.PARAM_HP_CLARITY_GAIN}", s.clarityGain)
@@ -4025,6 +4103,10 @@ class MainViewModel @Inject constructor(
         )
         repository.setIntPreference("spk_${ViperParams.PARAM_SPK_BASS_GAIN}", s.spkBassGain)
         repository.setBooleanPreference(
+            "spk_${ViperParams.PARAM_SPK_BASS_ANTI_POP}",
+            s.spkBassAntiPop
+        )
+        repository.setBooleanPreference(
             "spk_${ViperParams.PARAM_SPK_BASS_MONO_ENABLE}",
             s.spkBassMonoEnabled
         )
@@ -4039,6 +4121,10 @@ class MainViewModel @Inject constructor(
         repository.setIntPreference(
             "spk_${ViperParams.PARAM_SPK_BASS_MONO_GAIN}",
             s.spkBassMonoGain
+        )
+        repository.setBooleanPreference(
+            "spk_${ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP}",
+            s.spkBassMonoAntiPop
         )
         repository.setBooleanPreference(
             "spk_${ViperParams.PARAM_SPK_CLARITY_ENABLE}",
@@ -4803,6 +4889,12 @@ class MainViewModel @Inject constructor(
             obj.put("bassMode", state.bassMode)
             obj.put("bassFrequency", state.bassFrequency)
             obj.put("bassGain", state.bassGain)
+            obj.put("bassAntiPop", state.bassAntiPop)
+            obj.put("bassMonoEnabled", state.bassMonoEnabled)
+            obj.put("bassMonoMode", state.bassMonoMode)
+            obj.put("bassMonoFrequency", state.bassMonoFrequency)
+            obj.put("bassMonoGain", state.bassMonoGain)
+            obj.put("bassMonoAntiPop", state.bassMonoAntiPop)
             obj.put("clarityEnabled", state.clarityEnabled)
             obj.put("clarityMode", state.clarityMode)
             obj.put("clarityGain", state.clarityGain)
@@ -4874,6 +4966,12 @@ class MainViewModel @Inject constructor(
             obj.put("spkBassMode", state.spkBassMode)
             obj.put("spkBassFrequency", state.spkBassFrequency)
             obj.put("spkBassGain", state.spkBassGain)
+            obj.put("spkBassAntiPop", state.spkBassAntiPop)
+            obj.put("spkBassMonoEnabled", state.spkBassMonoEnabled)
+            obj.put("spkBassMonoMode", state.spkBassMonoMode)
+            obj.put("spkBassMonoFrequency", state.spkBassMonoFrequency)
+            obj.put("spkBassMonoGain", state.spkBassMonoGain)
+            obj.put("spkBassMonoAntiPop", state.spkBassMonoAntiPop)
             obj.put("spkClarityEnabled", state.spkClarityEnabled)
             obj.put("spkClarityMode", state.spkClarityMode)
             obj.put("spkClarityGain", state.spkClarityGain)
@@ -4977,6 +5075,12 @@ class MainViewModel @Inject constructor(
                 bassMode = obj.optInt("bassMode", state.bassMode),
                 bassFrequency = obj.optInt("bassFrequency", state.bassFrequency),
                 bassGain = obj.optInt("bassGain", state.bassGain),
+                bassAntiPop = obj.optBoolean("bassAntiPop", state.bassAntiPop),
+                bassMonoEnabled = obj.optBoolean("bassMonoEnabled", state.bassMonoEnabled),
+                bassMonoMode = obj.optInt("bassMonoMode", state.bassMonoMode),
+                bassMonoFrequency = obj.optInt("bassMonoFrequency", state.bassMonoFrequency),
+                bassMonoGain = obj.optInt("bassMonoGain", state.bassMonoGain),
+                bassMonoAntiPop = obj.optBoolean("bassMonoAntiPop", state.bassMonoAntiPop),
                 clarityEnabled = obj.optBoolean("clarityEnabled", state.clarityEnabled),
                 clarityMode = obj.optInt("clarityMode", state.clarityMode),
                 clarityGain = obj.optInt("clarityGain", state.clarityGain),
@@ -5087,6 +5191,15 @@ class MainViewModel @Inject constructor(
                 spkBassMode = obj.optInt("spkBassMode", state.spkBassMode),
                 spkBassFrequency = obj.optInt("spkBassFrequency", state.spkBassFrequency),
                 spkBassGain = obj.optInt("spkBassGain", state.spkBassGain),
+                spkBassAntiPop = obj.optBoolean("spkBassAntiPop", state.spkBassAntiPop),
+                spkBassMonoEnabled = obj.optBoolean("spkBassMonoEnabled", state.spkBassMonoEnabled),
+                spkBassMonoMode = obj.optInt("spkBassMonoMode", state.spkBassMonoMode),
+                spkBassMonoFrequency = obj.optInt(
+                    "spkBassMonoFrequency",
+                    state.spkBassMonoFrequency
+                ),
+                spkBassMonoGain = obj.optInt("spkBassMonoGain", state.spkBassMonoGain),
+                spkBassMonoAntiPop = obj.optBoolean("spkBassMonoAntiPop", state.spkBassMonoAntiPop),
                 spkClarityEnabled = obj.optBoolean("spkClarityEnabled", state.spkClarityEnabled),
                 spkClarityMode = obj.optInt("spkClarityMode", state.spkClarityMode),
                 spkClarityGain = obj.optInt("spkClarityGain", state.spkClarityGain),
@@ -5195,6 +5308,12 @@ class MainViewModel @Inject constructor(
                     bassMode = obj.optInt("bassMode", state.bassMode),
                     bassFrequency = obj.optInt("bassFrequency", state.bassFrequency),
                     bassGain = obj.optInt("bassGain", state.bassGain),
+                    bassAntiPop = obj.optBoolean("bassAntiPop", state.bassAntiPop),
+                    bassMonoEnabled = obj.optBoolean("bassMonoEnabled", state.bassMonoEnabled),
+                    bassMonoMode = obj.optInt("bassMonoMode", state.bassMonoMode),
+                    bassMonoFrequency = obj.optInt("bassMonoFrequency", state.bassMonoFrequency),
+                    bassMonoGain = obj.optInt("bassMonoGain", state.bassMonoGain),
+                    bassMonoAntiPop = obj.optBoolean("bassMonoAntiPop", state.bassMonoAntiPop),
                     clarityEnabled = obj.optBoolean("clarityEnabled", state.clarityEnabled),
                     clarityMode = obj.optInt("clarityMode", state.clarityMode),
                     clarityGain = obj.optInt("clarityGain", state.clarityGain),
@@ -5314,6 +5433,21 @@ class MainViewModel @Inject constructor(
                     spkBassMode = obj.optInt("spkBassMode", state.spkBassMode),
                     spkBassFrequency = obj.optInt("spkBassFrequency", state.spkBassFrequency),
                     spkBassGain = obj.optInt("spkBassGain", state.spkBassGain),
+                    spkBassAntiPop = obj.optBoolean("spkBassAntiPop", state.spkBassAntiPop),
+                    spkBassMonoEnabled = obj.optBoolean(
+                        "spkBassMonoEnabled",
+                        state.spkBassMonoEnabled
+                    ),
+                    spkBassMonoMode = obj.optInt("spkBassMonoMode", state.spkBassMonoMode),
+                    spkBassMonoFrequency = obj.optInt(
+                        "spkBassMonoFrequency",
+                        state.spkBassMonoFrequency
+                    ),
+                    spkBassMonoGain = obj.optInt("spkBassMonoGain", state.spkBassMonoGain),
+                    spkBassMonoAntiPop = obj.optBoolean(
+                        "spkBassMonoAntiPop",
+                        state.spkBassMonoAntiPop
+                    ),
                     spkClarityEnabled = obj.optBoolean(
                         "spkClarityEnabled",
                         state.spkClarityEnabled

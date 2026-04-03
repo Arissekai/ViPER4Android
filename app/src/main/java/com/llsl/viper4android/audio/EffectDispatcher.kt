@@ -501,6 +501,7 @@ object EffectDispatcher {
         effect.setParameter(ViperParams.PARAM_HP_BASS_MODE, state.bassMode)
         effect.setParameter(ViperParams.PARAM_HP_BASS_FREQUENCY, state.bassFrequency + 15)
         effect.setParameter(ViperParams.PARAM_HP_BASS_GAIN, state.bassGain * 50 + 50)
+        effect.setParameter(ViperParams.PARAM_HP_BASS_ANTI_POP, if (state.bassAntiPop) 1 else 0)
 
         effect.setParameter(
             ViperParams.PARAM_HP_BASS_MONO_ENABLE,
@@ -510,6 +511,10 @@ object EffectDispatcher {
         effect.setParameter(ViperParams.PARAM_HP_BASS_MONO_MODE, state.bassMonoMode)
         effect.setParameter(ViperParams.PARAM_HP_BASS_MONO_FREQUENCY, state.bassMonoFrequency + 15)
         effect.setParameter(ViperParams.PARAM_HP_BASS_MONO_GAIN, state.bassMonoGain * 50 + 50)
+        effect.setParameter(
+            ViperParams.PARAM_HP_BASS_MONO_ANTI_POP,
+            if (state.bassMonoAntiPop) 1 else 0
+        )
 
         effect.setParameter(ViperParams.PARAM_HP_CLARITY_ENABLE, if (state.clarityEnabled) 1 else 0)
         FileLogger.d("Dispatch", "Clarity: ${if (state.clarityEnabled) "ON" else "OFF"}")
@@ -706,6 +711,7 @@ object EffectDispatcher {
         effect.setParameter(ViperParams.PARAM_SPK_BASS_MODE, state.spkBassMode)
         effect.setParameter(ViperParams.PARAM_SPK_BASS_FREQUENCY, state.spkBassFrequency + 15)
         effect.setParameter(ViperParams.PARAM_SPK_BASS_GAIN, state.spkBassGain * 50 + 50)
+        effect.setParameter(ViperParams.PARAM_SPK_BASS_ANTI_POP, if (state.spkBassAntiPop) 1 else 0)
 
         effect.setParameter(
             ViperParams.PARAM_SPK_BASS_MONO_ENABLE,
@@ -718,6 +724,10 @@ object EffectDispatcher {
             state.spkBassMonoFrequency + 15
         )
         effect.setParameter(ViperParams.PARAM_SPK_BASS_MONO_GAIN, state.spkBassMonoGain * 50 + 50)
+        effect.setParameter(
+            ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP,
+            if (state.spkBassMonoAntiPop) 1 else 0
+        )
 
         effect.setParameter(
             ViperParams.PARAM_SPK_CLARITY_ENABLE,
@@ -996,6 +1006,8 @@ object EffectDispatcher {
         val bassFrequency =
             repository.getIntPreference("${ViperParams.PARAM_HP_BASS_FREQUENCY}", 55).first()
         val bassGain = repository.getIntPreference("${ViperParams.PARAM_HP_BASS_GAIN}", 0).first()
+        val bassAntiPop =
+            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_ANTI_POP}", true).first()
         val bassMonoEnabled =
             repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_MONO_ENABLE}").first()
         val bassMonoMode =
@@ -1004,6 +1016,9 @@ object EffectDispatcher {
             repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_FREQUENCY}", 55).first()
         val bassMonoGain =
             repository.getIntPreference("${ViperParams.PARAM_HP_BASS_MONO_GAIN}", 0).first()
+        val bassMonoAntiPop =
+            repository.getBooleanPreference("${ViperParams.PARAM_HP_BASS_MONO_ANTI_POP}", true)
+                .first()
         val clarityEnabled =
             repository.getBooleanPreference("${ViperParams.PARAM_HP_CLARITY_ENABLE}").first()
         val clarityMode =
@@ -1080,10 +1095,12 @@ object EffectDispatcher {
             bassMode = bassMode,
             bassFrequency = bassFrequency,
             bassGain = bassGain,
+            bassAntiPop = bassAntiPop,
             bassMonoEnabled = bassMonoEnabled,
             bassMonoMode = bassMonoMode,
             bassMonoFrequency = bassMonoFrequency,
             bassMonoGain = bassMonoGain,
+            bassMonoAntiPop = bassMonoAntiPop,
             clarityEnabled = clarityEnabled,
             clarityMode = clarityMode,
             clarityGain = clarityGain,
@@ -1153,6 +1170,9 @@ object EffectDispatcher {
             repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_FREQUENCY}", 55).first()
         val spkBassGain =
             repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_GAIN}", 0).first()
+        val spkBassAntiPop =
+            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_ANTI_POP}", true)
+                .first()
         val spkBassMonoEnabled =
             repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_ENABLE}").first()
         val spkBassMonoMode =
@@ -1162,6 +1182,9 @@ object EffectDispatcher {
                 .first()
         val spkBassMonoGain =
             repository.getIntPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_GAIN}", 0).first()
+        val spkBassMonoAntiPop =
+            repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_BASS_MONO_ANTI_POP}", true)
+                .first()
         val spkClarityEnabled =
             repository.getBooleanPreference("spk_${ViperParams.PARAM_SPK_CLARITY_ENABLE}").first()
         val spkClarityMode =
@@ -1246,10 +1269,12 @@ object EffectDispatcher {
             spkBassMode = spkBassMode,
             spkBassFrequency = spkBassFrequency,
             spkBassGain = spkBassGain,
+            spkBassAntiPop = spkBassAntiPop,
             spkBassMonoEnabled = spkBassMonoEnabled,
             spkBassMonoMode = spkBassMonoMode,
             spkBassMonoFrequency = spkBassMonoFrequency,
             spkBassMonoGain = spkBassMonoGain,
+            spkBassMonoAntiPop = spkBassMonoAntiPop,
             spkClarityEnabled = spkClarityEnabled,
             spkClarityMode = spkClarityMode,
             spkClarityGain = spkClarityGain,

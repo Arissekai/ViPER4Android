@@ -860,6 +860,7 @@ fun ViperBassSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
     val bassMode = if (isSpkMode) state.spkBassMode else state.bassMode
     val bassFrequency = if (isSpkMode) state.spkBassFrequency else state.bassFrequency
     val bassGain = if (isSpkMode) state.spkBassGain else state.bassGain
+    val bassAntiPop = if (isSpkMode) state.spkBassAntiPop else state.bassAntiPop
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkBassEnabled else viewModel::setBassEnabled
     val onModeChange: (Int) -> Unit =
@@ -868,6 +869,8 @@ fun ViperBassSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
         if (isSpkMode) viewModel::setSpkBassFrequency else viewModel::setBassFrequency
     val onGainChange: (Int) -> Unit =
         if (isSpkMode) viewModel::setSpkBassGain else viewModel::setBassGain
+    val onAntiPopChange: (Boolean) -> Unit =
+        if (isSpkMode) viewModel::setSpkBassAntiPop else viewModel::setBassAntiPop
 
     val modeNames = listOf(
         stringResource(R.string.bass_mode_natural),
@@ -887,13 +890,15 @@ fun ViperBassSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
             options = modeNames,
             onOptionSelected = { index, _ -> onModeChange(index) }
         )
-        LabeledSlider(
-            label = stringResource(R.string.label_bass_frequency),
-            value = bassFrequency.toFloat(),
-            onValueChange = { onFrequencyChange(it.roundToInt()) },
-            valueRange = 0f..135f,
-            valueLabel = "${bassFrequency + 15}Hz"
-        )
+        if (bassMode != 2) {
+            LabeledSlider(
+                label = stringResource(R.string.label_bass_frequency),
+                value = bassFrequency.toFloat(),
+                onValueChange = { onFrequencyChange(it.roundToInt()) },
+                valueRange = 0f..135f,
+                valueLabel = "${bassFrequency + 15}Hz"
+            )
+        }
         LabeledSlider(
             label = stringResource(R.string.label_bass_gain),
             value = bassGain.toFloat(),
@@ -908,6 +913,11 @@ fun ViperBassSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Bo
                 }
             }dB"
         )
+        LabeledSwitch(
+            label = stringResource(R.string.label_bass_anti_pop),
+            checked = bassAntiPop,
+            onCheckedChange = onAntiPopChange
+        )
     }
 }
 
@@ -917,6 +927,7 @@ fun ViperBassMonoSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
     val mode = if (isSpkMode) state.spkBassMonoMode else state.bassMonoMode
     val frequency = if (isSpkMode) state.spkBassMonoFrequency else state.bassMonoFrequency
     val gain = if (isSpkMode) state.spkBassMonoGain else state.bassMonoGain
+    val antiPop = if (isSpkMode) state.spkBassMonoAntiPop else state.bassMonoAntiPop
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkBassMonoEnabled else viewModel::setBassMonoEnabled
     val onModeChange: (Int) -> Unit =
@@ -925,6 +936,8 @@ fun ViperBassMonoSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
         if (isSpkMode) viewModel::setSpkBassMonoFrequency else viewModel::setBassMonoFrequency
     val onGainChange: (Int) -> Unit =
         if (isSpkMode) viewModel::setSpkBassMonoGain else viewModel::setBassMonoGain
+    val onAntiPopChange: (Boolean) -> Unit =
+        if (isSpkMode) viewModel::setSpkBassMonoAntiPop else viewModel::setBassMonoAntiPop
 
     val modeNames = listOf(
         stringResource(R.string.bass_mode_natural),
@@ -944,13 +957,15 @@ fun ViperBassMonoSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
             options = modeNames,
             onOptionSelected = { index, _ -> onModeChange(index) }
         )
-        LabeledSlider(
-            label = stringResource(R.string.label_bass_frequency),
-            value = frequency.toFloat(),
-            onValueChange = { onFrequencyChange(it.roundToInt()) },
-            valueRange = 0f..135f,
-            valueLabel = "${frequency + 15}Hz"
-        )
+        if (mode != 2) {
+            LabeledSlider(
+                label = stringResource(R.string.label_bass_frequency),
+                value = frequency.toFloat(),
+                onValueChange = { onFrequencyChange(it.roundToInt()) },
+                valueRange = 0f..135f,
+                valueLabel = "${frequency + 15}Hz"
+            )
+        }
         LabeledSlider(
             label = stringResource(R.string.label_bass_gain),
             value = gain.toFloat(),
@@ -964,6 +979,11 @@ fun ViperBassMonoSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
                     MainViewModel.BASS_GAIN_DB_LABELS.getOrElse(gain) { "--" }
                 }
             }dB"
+        )
+        LabeledSwitch(
+            label = stringResource(R.string.label_bass_anti_pop),
+            checked = antiPop,
+            onCheckedChange = onAntiPopChange
         )
     }
 }
