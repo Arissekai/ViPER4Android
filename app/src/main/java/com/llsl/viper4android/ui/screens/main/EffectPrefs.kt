@@ -454,6 +454,14 @@ val EFFECT_PREFS: List<EffectPref<*>> = listOf(
         getHp = { it.diffSurroundDelay }, setHp = { copy(diffSurroundDelay = it) },
         getSp = { it.spkDiffSurroundDelay }, setSp = { copy(spkDiffSurroundDelay = it) }
     ),
+    BoolPref(
+        hpPrefKey = "${ViperParams.PARAM_HP_DIFF_SURROUND_REVERSE}",
+        spkPrefKey = "spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_REVERSE}",
+        jsonKey = "diffSurroundReverse", spkJsonKey = "spkDiffSurroundReverse",
+        defaultValue = false,
+        getHp = { it.diffSurroundReverse }, setHp = { copy(diffSurroundReverse = it) },
+        getSp = { it.spkDiffSurroundReverse }, setSp = { copy(spkDiffSurroundReverse = it) }
+    ),
 
     // VHE (Headphone Surround)
     BoolPref(

@@ -73,6 +73,7 @@ object ViperParams {
 
     const val PARAM_HP_DIFF_SURROUND_ENABLE = 0x101B0
     const val PARAM_HP_DIFF_SURROUND_DELAY = 0x101B1
+    const val PARAM_HP_DIFF_SURROUND_REVERSE = 0x101B2
 
     const val PARAM_HP_CURE_ENABLE = 0x101C0
     const val PARAM_HP_CURE_STRENGTH = 0x101C1
@@ -166,6 +167,7 @@ object ViperParams {
 
     const val PARAM_SPK_DIFF_SURROUND_ENABLE = 0x103B0
     const val PARAM_SPK_DIFF_SURROUND_DELAY = 0x103B1
+    const val PARAM_SPK_DIFF_SURROUND_REVERSE = 0x103B2
 
     const val PARAM_SPK_CURE_ENABLE = 0x103C0
     const val PARAM_SPK_CURE_STRENGTH = 0x103C1

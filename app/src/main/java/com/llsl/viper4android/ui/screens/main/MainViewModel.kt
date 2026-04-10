@@ -107,6 +107,7 @@ data class MainUiState(
 
     val diffSurroundEnabled: Boolean = false,
     val diffSurroundDelay: Int = 4,
+    val diffSurroundReverse: Boolean = false,
 
     val vheEnabled: Boolean = false,
     val vheQuality: Int = 0,
@@ -208,6 +209,7 @@ data class MainUiState(
 
     val spkDiffSurroundEnabled: Boolean = false,
     val spkDiffSurroundDelay: Int = 4,
+    val spkDiffSurroundReverse: Boolean = false,
 
     val spkVheEnabled: Boolean = false,
     val spkVheQuality: Int = 0,
@@ -1263,6 +1265,10 @@ class MainViewModel @Inject constructor(
                     ParamEntry(
                         ViperParams.PARAM_HP_DIFF_SURROUND_DELAY,
                         intArrayOf(EffectDispatcher.DIFF_SURROUND_DELAY_VALUES.getOrElse(s.diffSurroundDelay) { 500 })
+                    ),
+                    ParamEntry(
+                        ViperParams.PARAM_HP_DIFF_SURROUND_REVERSE,
+                        intArrayOf(if (s.diffSurroundReverse) 1 else 0)
                     )
                 )
             )
@@ -1280,6 +1286,17 @@ class MainViewModel @Inject constructor(
         hpDispatchInt(
             ViperParams.PARAM_HP_DIFF_SURROUND_DELAY,
             DIFF_SURROUND_DELAY_VALUES.getOrElse(value) { 500 })
+    }
+
+    fun setDiffSurroundReverse(reverse: Boolean) {
+        _uiState.update { it.copy(diffSurroundReverse = reverse) }
+        viewModelScope.launch {
+            repository.setBooleanPreference(
+                "${ViperParams.PARAM_HP_DIFF_SURROUND_REVERSE}",
+                reverse
+            )
+        }
+        hpDispatchInt(ViperParams.PARAM_HP_DIFF_SURROUND_REVERSE, if (reverse) 1 else 0)
     }
 
     fun setVheEnabled(enabled: Boolean) {
@@ -2569,6 +2586,10 @@ class MainViewModel @Inject constructor(
                     ParamEntry(
                         ViperParams.PARAM_SPK_DIFF_SURROUND_DELAY,
                         intArrayOf(EffectDispatcher.DIFF_SURROUND_DELAY_VALUES.getOrElse(s.spkDiffSurroundDelay) { 500 })
+                    ),
+                    ParamEntry(
+                        ViperParams.PARAM_SPK_DIFF_SURROUND_REVERSE,
+                        intArrayOf(if (s.spkDiffSurroundReverse) 1 else 0)
                     )
                 )
             )
@@ -2586,6 +2607,17 @@ class MainViewModel @Inject constructor(
         spkDispatchInt(
             ViperParams.PARAM_SPK_DIFF_SURROUND_DELAY,
             DIFF_SURROUND_DELAY_VALUES.getOrElse(value) { 500 })
+    }
+
+    fun setSpkDiffSurroundReverse(reverse: Boolean) {
+        _uiState.update { it.copy(spkDiffSurroundReverse = reverse) }
+        viewModelScope.launch {
+            repository.setBooleanPreference(
+                "spk_${ViperParams.PARAM_SPK_DIFF_SURROUND_REVERSE}",
+                reverse
+            )
+        }
+        spkDispatchInt(ViperParams.PARAM_SPK_DIFF_SURROUND_REVERSE, if (reverse) 1 else 0)
     }
 
     fun setSpkVheEnabled(enabled: Boolean) {

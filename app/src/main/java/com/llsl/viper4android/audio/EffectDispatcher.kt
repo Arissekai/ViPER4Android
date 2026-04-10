@@ -456,6 +456,10 @@ object EffectDispatcher {
         effect.setParameter(
             ViperParams.PARAM_HP_DIFF_SURROUND_DELAY,
             DIFF_SURROUND_DELAY_VALUES.getOrElse(state.diffSurroundDelay) { 500 })
+        effect.setParameter(
+            ViperParams.PARAM_HP_DIFF_SURROUND_REVERSE,
+            if (state.diffSurroundReverse) 1 else 0
+        )
 
         effect.setParameter(
             ViperParams.PARAM_HP_HEADPHONE_SURROUND_ENABLE,
@@ -674,6 +678,10 @@ object EffectDispatcher {
         effect.setParameter(
             ViperParams.PARAM_SPK_DIFF_SURROUND_DELAY,
             DIFF_SURROUND_DELAY_VALUES.getOrElse(state.spkDiffSurroundDelay) { 500 })
+        effect.setParameter(
+            ViperParams.PARAM_SPK_DIFF_SURROUND_REVERSE,
+            if (state.spkDiffSurroundReverse) 1 else 0
+        )
 
         effect.setParameter(
             ViperParams.PARAM_SPK_HEADPHONE_SURROUND_ENABLE,

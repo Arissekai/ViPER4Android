@@ -542,10 +542,13 @@ fun FieldSurroundSection(state: MainUiState, viewModel: MainViewModel, isSpkMode
 fun DiffSurroundSection(state: MainUiState, viewModel: MainViewModel, isSpkMode: Boolean = false) {
     val enabled = if (isSpkMode) state.spkDiffSurroundEnabled else state.diffSurroundEnabled
     val delay = if (isSpkMode) state.spkDiffSurroundDelay else state.diffSurroundDelay
+    val reverse = if (isSpkMode) state.spkDiffSurroundReverse else state.diffSurroundReverse
     val onEnabledChange: (Boolean) -> Unit =
         if (isSpkMode) viewModel::setSpkDiffSurroundEnabled else viewModel::setDiffSurroundEnabled
     val onDelayChange: (Int) -> Unit =
         if (isSpkMode) viewModel::setSpkDiffSurroundDelay else viewModel::setDiffSurroundDelay
+    val onReverseChange: (Boolean) -> Unit =
+        if (isSpkMode) viewModel::setSpkDiffSurroundReverse else viewModel::setDiffSurroundReverse
 
     val delayValue = MainViewModel.DIFF_SURROUND_DELAY_VALUES.getOrElse(delay) { 500 }
 
@@ -562,6 +565,11 @@ fun DiffSurroundSection(state: MainUiState, viewModel: MainViewModel, isSpkMode:
             valueRange = 0f..19f,
             steps = 18,
             valueLabel = "${delayValue / 100}ms"
+        )
+        LabeledSwitch(
+            label = stringResource(R.string.label_diff_surround_reverse),
+            checked = reverse,
+            onCheckedChange = onReverseChange
         )
     }
 }

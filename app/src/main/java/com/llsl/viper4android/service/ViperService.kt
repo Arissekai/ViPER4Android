@@ -713,6 +713,12 @@ class ViperService : LifecycleService() {
                 intArrayOf(EffectDispatcher.DIFF_SURROUND_DELAY_VALUES.getOrElse(state.diffSurroundDelay) { 500 })
             )
         )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_HP_DIFF_SURROUND_REVERSE,
+                intArrayOf(if (state.diffSurroundReverse) 1 else 0)
+            )
+        )
 
         params.add(
             ParamEntry(
@@ -1138,6 +1144,12 @@ class ViperService : LifecycleService() {
             ParamEntry(
                 ViperParams.PARAM_SPK_DIFF_SURROUND_DELAY,
                 intArrayOf(EffectDispatcher.DIFF_SURROUND_DELAY_VALUES.getOrElse(state.spkDiffSurroundDelay) { 500 })
+            )
+        )
+        params.add(
+            ParamEntry(
+                ViperParams.PARAM_SPK_DIFF_SURROUND_REVERSE,
+                intArrayOf(if (state.spkDiffSurroundReverse) 1 else 0)
             )
         )
 
