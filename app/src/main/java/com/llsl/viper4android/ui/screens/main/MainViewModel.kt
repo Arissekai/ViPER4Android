@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.IBinder
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.llsl.viper4android.audio.AudioDevice
 import com.llsl.viper4android.audio.AudioOutputDetector
 import com.llsl.viper4android.audio.ByteArrayParam
 import com.llsl.viper4android.audio.ConfigChannel
@@ -16,6 +17,7 @@ import com.llsl.viper4android.audio.EffectDispatcher
 import com.llsl.viper4android.audio.ParamEntry
 import com.llsl.viper4android.audio.ViperEffect
 import com.llsl.viper4android.audio.ViperParams
+import com.llsl.viper4android.data.model.DeviceSettings
 import com.llsl.viper4android.data.model.DsPreset
 import com.llsl.viper4android.data.model.EqPreset
 import com.llsl.viper4android.data.model.Preset
@@ -258,6 +260,9 @@ data class MainUiState(
     val spkAnalogxMode: Int = 0,
 
     val speakerOptEnabled: Boolean = false,
+
+    val activeDeviceName: String = "",
+    val activeDeviceId: String = "",
 )
 
 @HiltViewModel
@@ -290,6 +295,9 @@ class MainViewModel @Inject constructor(
     val presetList: StateFlow<List<Preset>> = repository.getAllPresets()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val deviceSettingsList: StateFlow<List<DeviceSettings>> = repository.getAllDeviceSettings()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _driverStatus = MutableStateFlow(DriverStatus())
     val driverStatus: StateFlow<DriverStatus> = _driverStatus.asStateFlow()
 
@@ -316,6 +324,7 @@ class MainViewModel @Inject constructor(
     private var serviceBound = false
     private val audioOutputDetector = AudioOutputDetector(application)
     private var activeDeviceType: Int = ViperParams.FX_TYPE_HEADPHONE
+    private var currentDeviceId: String = AudioDevice.ID_SPEAKER
     private var eqPresetsJob: Job? = null
     private var spkEqPresetsJob: Job? = null
     private var dsPresetsJob: Job? = null
@@ -338,27 +347,48 @@ class MainViewModel @Inject constructor(
     init {
         loadSettingsPreferences()
         refreshFileLists()
+        val initialDevice = audioOutputDetector.activeDevice.value
+        currentDeviceId = initialDevice.id
+        val initialFxType =
+            if (initialDevice.isHeadphone) ViperParams.FX_TYPE_HEADPHONE else ViperParams.FX_TYPE_SPEAKER
+        activeDeviceType = initialFxType
         viewModelScope.launch {
             loadInitialState()
+            val initialDbName =
+                repository.getDeviceSettings(initialDevice.id)?.deviceName ?: initialDevice.name
+            _uiState.update {
+                it.copy(
+                    fxType = initialFxType,
+                    activeDeviceName = initialDbName,
+                    activeDeviceId = initialDevice.id
+                )
+            }
             loadEqPresetsForBandCount(_uiState.value.eqBandCount, isSpk = false)
             loadEqPresetsForBandCount(_uiState.value.spkEqBandCount, isSpk = true)
             loadDsPresets()
+            loadDeviceSettings(initialDevice)
+            ensureDeviceEntry(initialDevice)
             bindToService()
-            audioOutputDetector.isHeadphoneConnected.collect { headphoneConnected ->
+            audioOutputDetector.activeDevice.collect { device ->
                 val detectedType =
-                    if (headphoneConnected) ViperParams.FX_TYPE_HEADPHONE else ViperParams.FX_TYPE_SPEAKER
-                if (activeDeviceType != detectedType) {
+                    if (device.isHeadphone) ViperParams.FX_TYPE_HEADPHONE else ViperParams.FX_TYPE_SPEAKER
+                if (device.id != currentDeviceId) {
+                    saveCurrentDeviceSettings()
                     activeDeviceType = detectedType
-                    _uiState.update { it.copy(fxType = detectedType) }
-                    viewModelScope.launch {
-                        repository.setIntPreference(
-                            ViperRepository.PREF_FX_TYPE,
-                            detectedType
+                    currentDeviceId = device.id
+                    val dbName = repository.getDeviceSettings(device.id)?.deviceName ?: device.name
+                    _uiState.update {
+                        it.copy(
+                            fxType = detectedType,
+                            activeDeviceName = dbName,
+                            activeDeviceId = device.id
                         )
                     }
+                    repository.setIntPreference(ViperRepository.PREF_FX_TYPE, detectedType)
                     ConfigChannel.setActiveFxType(detectedType)
-                    applyFullState()
+                    loadDeviceSettings(device)
                 }
+                ensureDeviceEntry(device)
             }
         }
     }
@@ -3131,6 +3161,82 @@ class MainViewModel @Inject constructor(
             ViperParams.PARAM_SPK_CHANNEL_PAN,
             value
         )
+    }
+
+    private suspend fun ensureDeviceEntry(device: AudioDevice) {
+        val existing = repository.getDeviceSettings(device.id)
+        if (existing == null) {
+            val state = _uiState.value
+            val isSpk = !device.isHeadphone
+            repository.saveDeviceSettings(
+                DeviceSettings(
+                    deviceId = device.id,
+                    deviceName = device.name,
+                    isHeadphone = device.isHeadphone,
+                    settingsJson = serializeEffectPrefs(state, isSpk).toString()
+                )
+            )
+        } else {
+            repository.updateDeviceLastConnected(device.id)
+        }
+    }
+
+    private suspend fun saveCurrentDeviceSettings() {
+        val state = _uiState.value
+        val isSpk = activeDeviceType == ViperParams.FX_TYPE_SPEAKER
+        val json = serializeEffectPrefs(state, isSpk).toString()
+        val existing = repository.getDeviceSettings(currentDeviceId)
+        repository.saveDeviceSettings(
+            DeviceSettings(
+                deviceId = currentDeviceId,
+                deviceName = existing?.deviceName ?: state.activeDeviceName,
+                isHeadphone = existing?.isHeadphone ?: !isSpk,
+                settingsJson = json
+            )
+        )
+    }
+
+    private suspend fun loadDeviceSettings(device: AudioDevice) {
+        val saved = repository.getDeviceSettings(device.id) ?: return
+        val isSpk = !device.isHeadphone
+        val json = JSONObject(saved.settingsJson)
+        _uiState.update { deserializeEffectPrefs(json, it, isSpk) }
+        saveEffectPrefs(repository, _uiState.value, isSpk)
+        applyFullState()
+    }
+
+    fun renameDevice(deviceId: String, name: String) {
+        viewModelScope.launch {
+            repository.renameDevice(deviceId, name)
+            if (deviceId == currentDeviceId) {
+                _uiState.update { it.copy(activeDeviceName = name) }
+            }
+        }
+    }
+
+    fun deleteDeviceSettings(deviceId: String) {
+        viewModelScope.launch { repository.deleteDeviceSettings(deviceId) }
+    }
+
+    fun saveDevicePreset(deviceId: String) {
+        viewModelScope.launch {
+            val existing = repository.getDeviceSettings(deviceId) ?: return@launch
+            val state = _uiState.value
+            val isSpk = !existing.isHeadphone
+            val json = serializeEffectPrefs(state, isSpk).toString()
+            repository.saveDeviceSettings(existing.copy(settingsJson = json))
+        }
+    }
+
+    fun loadDevicePreset(deviceId: String) {
+        viewModelScope.launch {
+            val saved = repository.getDeviceSettings(deviceId) ?: return@launch
+            val isSpk = !saved.isHeadphone
+            val json = JSONObject(saved.settingsJson)
+            _uiState.update { deserializeEffectPrefs(json, it, isSpk) }
+            saveEffectPrefs(repository, _uiState.value, isSpk)
+            applyFullState()
+        }
     }
 
     private fun getFilesDir(subDir: String): File {

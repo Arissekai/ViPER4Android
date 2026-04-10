@@ -16,6 +16,7 @@
     <string name="menu_driver_status">Driver Status</string>
     <string name="menu_presets">Presets</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_devices">Devices</string>
 
     <!-- Output / Master limiter -->
     <string name="section_output">Master Limiter</string>
