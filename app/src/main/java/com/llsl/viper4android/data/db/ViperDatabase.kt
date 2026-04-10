@@ -4,22 +4,25 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.llsl.viper4android.data.dao.DeviceSettingsDao
 import com.llsl.viper4android.data.dao.DsPresetDao
 import com.llsl.viper4android.data.dao.EqPresetDao
 import com.llsl.viper4android.data.dao.PresetDao
+import com.llsl.viper4android.data.model.DeviceSettings
 import com.llsl.viper4android.data.model.DsPreset
 import com.llsl.viper4android.data.model.EqPreset
 import com.llsl.viper4android.data.model.Preset
 
 @Database(
-    entities = [Preset::class, EqPreset::class, DsPreset::class],
-    version = 3,
+    entities = [Preset::class, EqPreset::class, DsPreset::class, DeviceSettings::class],
+    version = 4,
     exportSchema = true
 )
 abstract class ViperDatabase : RoomDatabase() {
     abstract fun presetDao(): PresetDao
     abstract fun eqPresetDao(): EqPresetDao
     abstract fun dsPresetDao(): DsPresetDao
+    abstract fun deviceSettingsDao(): DeviceSettingsDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -46,6 +49,19 @@ abstract class ViperDatabase : RoomDatabase() {
                             "`y_high` INTEGER NOT NULL, " +
                             "`side_gain_low` INTEGER NOT NULL, " +
                             "`side_gain_high` INTEGER NOT NULL)"
+                )
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `device_settings` (" +
+                            "`device_id` TEXT NOT NULL PRIMARY KEY, " +
+                            "`device_name` TEXT NOT NULL, " +
+                            "`is_headphone` INTEGER NOT NULL, " +
+                            "`settings_json` TEXT NOT NULL, " +
+                            "`last_connected` INTEGER NOT NULL)"
                 )
             }
         }
