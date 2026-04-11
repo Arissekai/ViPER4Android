@@ -1,6 +1,9 @@
 package com.llsl.viper4android.ui.components
 
+import android.graphics.Color.argb
+import android.graphics.Paint
 import android.graphics.Typeface
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -89,9 +92,7 @@ fun EqCurveGraph(
         color = surfaceDark,
         shape = RoundedCornerShape(12.dp)
     ) {
-        androidx.compose.foundation.Canvas(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Canvas(modifier = Modifier.fillMaxWidth()) {
             val paddingLeft = 28.dp.toPx()
             val paddingRight = 16.dp.toPx()
             val paddingTop = 24.dp.toPx()
@@ -100,32 +101,32 @@ fun EqCurveGraph(
             val graphWidth = size.width - paddingLeft - paddingRight
             val graphHeight = size.height - paddingTop - paddingBottom
 
-            val gridPaint = android.graphics.Paint().apply {
-                color = android.graphics.Color.argb(25, 255, 255, 255)
+            val gridPaint = Paint().apply {
+                color = argb(25, 255, 255, 255)
                 strokeWidth = 1f
-                style = android.graphics.Paint.Style.STROKE
+                style = Paint.Style.STROKE
             }
 
-            val freqTextPaint = android.graphics.Paint().apply {
+            val freqTextPaint = Paint().apply {
                 color = onSurfaceVariant.hashCode()
                 textSize = with(density) { (if (bandCount > 15) 7 else 9).dp.toPx() }
-                textAlign = android.graphics.Paint.Align.CENTER
+                textAlign = Paint.Align.CENTER
                 isAntiAlias = true
                 typeface = Typeface.DEFAULT
             }
 
-            val dbLabelPaint = android.graphics.Paint().apply {
-                color = android.graphics.Color.argb(120, 255, 255, 255)
+            val dbLabelPaint = Paint().apply {
+                color = argb(120, 255, 255, 255)
                 textSize = with(density) { 8.dp.toPx() }
-                textAlign = android.graphics.Paint.Align.RIGHT
+                textAlign = Paint.Align.RIGHT
                 isAntiAlias = true
                 typeface = Typeface.DEFAULT
             }
 
-            val valuePaint = android.graphics.Paint().apply {
+            val valuePaint = Paint().apply {
                 color = primary.hashCode()
                 textSize = with(density) { 8.dp.toPx() }
-                textAlign = android.graphics.Paint.Align.CENTER
+                textAlign = Paint.Align.CENTER
                 isAntiAlias = true
                 typeface = Typeface.DEFAULT_BOLD
             }
