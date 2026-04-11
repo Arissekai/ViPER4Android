@@ -3,10 +3,18 @@ package com.llsl.viper4android.ui.screens.main
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
@@ -15,6 +23,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Speaker
+import androidx.compose.material.icons.filled.SpeakerGroup
 import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.Speaker
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,7 +44,9 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.llsl.viper4android.R
 import com.llsl.viper4android.audio.ViperParams
 import com.llsl.viper4android.ui.screens.debug.DebugLogDialog
+import com.llsl.viper4android.ui.screens.device.DeviceDialog
 import com.llsl.viper4android.ui.screens.preset.PresetDialog
 import com.llsl.viper4android.ui.screens.settings.SettingsDialog
 import com.llsl.viper4android.ui.screens.status.DriverStatusDialog
@@ -55,6 +68,7 @@ fun MainScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val presets by viewModel.presetList.collectAsStateWithLifecycle()
+    val deviceSettings by viewModel.deviceSettingsList.collectAsStateWithLifecycle()
     val driverStatus by viewModel.driverStatus.collectAsStateWithLifecycle()
     val autoStart by viewModel.autoStartEnabled.collectAsStateWithLifecycle()
     val aidlMode by viewModel.aidlModeEnabled.collectAsStateWithLifecycle()
@@ -65,6 +79,7 @@ fun MainScreen(
     var showDriverStatusDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showDebugLog by remember { mutableStateOf(false) }
+    var showDeviceDialog by remember { mutableStateOf(false) }
     var debugLogClearTime by remember { mutableLongStateOf(0L) }
 
     val context = LocalContext.current
@@ -112,6 +127,18 @@ fun MainScreen(
                 showDebugLog = false
             },
             onDismiss = { showDebugLog = false }
+        )
+    }
+
+    if (showDeviceDialog) {
+        DeviceDialog(
+            devices = deviceSettings,
+            activeDeviceId = state.activeDeviceId,
+            onRename = viewModel::renameDevice,
+            onLoad = viewModel::loadDevicePreset,
+            onSave = viewModel::saveDevicePreset,
+            onDelete = viewModel::deleteDeviceSettings,
+            onDismiss = { showDeviceDialog = false }
         )
     }
 
@@ -194,6 +221,12 @@ fun MainScreen(
                             )
                         }
                     }
+                    IconButton(onClick = { showDeviceDialog = true }) {
+                        Icon(
+                            Icons.Filled.SpeakerGroup,
+                            contentDescription = stringResource(R.string.menu_devices)
+                        )
+                    }
                     IconButton(onClick = { showDriverStatusDialog = true }) {
                         Icon(
                             Icons.Default.Info,
@@ -216,29 +249,52 @@ fun MainScreen(
             )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = selectedTab == 0,
-                    onClick = { viewModel.setFxType(ViperParams.FX_TYPE_HEADPHONE) },
-                    icon = {
-                        Icon(
-                            imageVector = if (selectedTab == 0) Icons.Filled.Headphones else Icons.Outlined.Headphones,
-                            contentDescription = null
+            Column {
+                val deviceName = state.activeDeviceName
+                if (deviceName.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(NavigationBarDefaults.containerColor)
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Canvas(modifier = Modifier.size(6.dp)) {
+                            drawCircle(Color(0xFF4CAF50))
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = deviceName,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    },
-                    label = { Text(stringResource(R.string.tab_headphone)) }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 1,
-                    onClick = { viewModel.setFxType(ViperParams.FX_TYPE_SPEAKER) },
-                    icon = {
-                        Icon(
-                            imageVector = if (selectedTab == 1) Icons.Filled.Speaker else Icons.Outlined.Speaker,
-                            contentDescription = null
-                        )
-                    },
-                    label = { Text(stringResource(R.string.tab_speaker)) }
-                )
+                    }
+                }
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = selectedTab == 0,
+                        onClick = { viewModel.setFxType(ViperParams.FX_TYPE_HEADPHONE) },
+                        icon = {
+                            Icon(
+                                imageVector = if (selectedTab == 0) Icons.Filled.Headphones else Icons.Outlined.Headphones,
+                                contentDescription = null
+                            )
+                        },
+                        label = { Text(stringResource(R.string.tab_headphone)) }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == 1,
+                        onClick = { viewModel.setFxType(ViperParams.FX_TYPE_SPEAKER) },
+                        icon = {
+                            Icon(
+                                imageVector = if (selectedTab == 1) Icons.Filled.Speaker else Icons.Outlined.Speaker,
+                                contentDescription = null
+                            )
+                        },
+                        label = { Text(stringResource(R.string.tab_speaker)) }
+                    )
+                }
             }
         }
     ) { paddingValues ->

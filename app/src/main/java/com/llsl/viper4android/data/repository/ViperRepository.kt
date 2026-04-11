@@ -6,9 +6,11 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.llsl.viper4android.data.dao.DeviceSettingsDao
 import com.llsl.viper4android.data.dao.DsPresetDao
 import com.llsl.viper4android.data.dao.EqPresetDao
 import com.llsl.viper4android.data.dao.PresetDao
+import com.llsl.viper4android.data.model.DeviceSettings
 import com.llsl.viper4android.data.model.DsPreset
 import com.llsl.viper4android.data.model.EqPreset
 import com.llsl.viper4android.data.model.Preset
@@ -22,6 +24,7 @@ class ViperRepository @Inject constructor(
     private val presetDao: PresetDao,
     private val eqPresetDao: EqPresetDao,
     private val dsPresetDao: DsPresetDao,
+    private val deviceSettingsDao: DeviceSettingsDao,
     private val dataStore: DataStore<Preferences>
 ) {
 
@@ -57,6 +60,23 @@ class ViperRepository @Inject constructor(
     suspend fun renameDsPreset(id: Long, name: String) = dsPresetDao.rename(id, name)
 
     suspend fun deleteDsPresetById(id: Long) = dsPresetDao.deleteById(id)
+
+    fun getAllDeviceSettings(): Flow<List<DeviceSettings>> = deviceSettingsDao.getAll()
+
+    suspend fun getDeviceSettings(deviceId: String): DeviceSettings? =
+        deviceSettingsDao.getByDeviceId(deviceId)
+
+    suspend fun saveDeviceSettings(settings: DeviceSettings) = deviceSettingsDao.upsert(settings)
+
+    suspend fun renameDevice(deviceId: String, name: String) =
+        deviceSettingsDao.rename(deviceId, name)
+
+    suspend fun deleteDeviceSettings(deviceId: String) =
+        deviceSettingsDao.deleteByDeviceId(deviceId)
+
+    suspend fun updateDeviceLastConnected(deviceId: String) =
+        deviceSettingsDao.updateLastConnected(deviceId, System.currentTimeMillis())
+
     fun getBooleanPreference(key: String, default: Boolean = false): Flow<Boolean> =
         dataStore.data.map { it[booleanPreferencesKey(key)] ?: default }
 

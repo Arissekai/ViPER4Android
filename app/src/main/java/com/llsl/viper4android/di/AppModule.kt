@@ -8,6 +8,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.llsl.viper4android.audio.EffectDispatcher
+import com.llsl.viper4android.data.dao.DeviceSettingsDao
 import com.llsl.viper4android.data.dao.DsPresetDao
 import com.llsl.viper4android.data.dao.EqPresetDao
 import com.llsl.viper4android.data.dao.PresetDao
@@ -45,7 +46,11 @@ object AppModule {
             ViperDatabase::class.java,
             "viper4android.db"
         )
-            .addMigrations(ViperDatabase.MIGRATION_1_2, ViperDatabase.MIGRATION_2_3)
+            .addMigrations(
+                ViperDatabase.MIGRATION_1_2,
+                ViperDatabase.MIGRATION_2_3,
+                ViperDatabase.MIGRATION_3_4
+            )
             .addCallback(object : RoomDatabase.Callback() {
                 override fun onCreate(sqDb: SupportSQLiteDatabase) {
                     super.onCreate(sqDb)
@@ -124,6 +129,11 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDsPresetDao(database: ViperDatabase): DsPresetDao = database.dsPresetDao()
+
+    @Provides
+    @Singleton
+    fun provideDeviceSettingsDao(database: ViperDatabase): DeviceSettingsDao =
+        database.deviceSettingsDao()
 
     @Provides
     @Singleton

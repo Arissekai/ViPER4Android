@@ -30,6 +30,7 @@
     <string name="menu_driver_status">placeholder</string>
     <string name="menu_presets">placeholder</string>
     <string name="menu_settings">placeholder</string>
+    <string name="menu_devices">placeholder</string>
 
     <!-- Output / Master limiter -->
     <string name="section_output">placeholder</string>
@@ -132,7 +133,7 @@
     <string name="label_bass_anti_pop">placeholder</string>
 
     <!-- ViPER Bass Mono -->
-    <string name="section_viper_bass_mono">ViPER Bass Mono</string>
+    <string name="section_viper_bass_mono">placeholder</string>
 
     <!-- ViPER Clarity -->
     <string name="section_viper_clarity">placeholder</string>
@@ -202,6 +203,24 @@
     <string name="settings_import_vdc">placeholder</string>
     <string name="import_success">placeholder</string>
     <string name="import_failed">placeholder</string>
+
+    <!-- Devices -->
+    <string name="device_dialog_title">placeholder</string>
+    <string name="device_type_bluetooth">placeholder</string>
+    <string name="device_type_wired">placeholder</string>
+    <string name="device_type_speaker">placeholder</string>
+    <string name="device_mode_headphone">placeholder</string>
+    <string name="device_mode_speaker">placeholder</string>
+    <string name="device_label_type">placeholder</string>
+    <string name="device_label_address">placeholder</string>
+    <string name="device_label_mode">placeholder</string>
+    <string name="device_label_last_conn">placeholder</string>
+    <string name="device_no_devices">placeholder</string>
+    <string name="device_rename_title">placeholder</string>
+    <string name="device_rename_hint">placeholder</string>
+    <string name="device_action_load">placeholder</string>
+    <string name="device_action_update">placeholder</string>
+    <string name="device_action_delete">placeholder</string>
 
     <!-- Actions -->
     <string name="action_save">placeholder</string>

@@ -16,6 +16,7 @@
     <string name="menu_driver_status">Driver Status</string>
     <string name="menu_presets">Presets</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_devices">Devices</string>
 
     <!-- Output / Master limiter -->
     <string name="section_output">Master Limiter</string>
@@ -188,6 +189,24 @@
     <string name="settings_import_vdc">Import VDC</string>
     <string name="import_success">Imported successfully</string>
     <string name="import_failed">Import failed</string>
+
+    <!-- Devices -->
+    <string name="device_dialog_title">Devices</string>
+    <string name="device_type_bluetooth">Bluetooth</string>
+    <string name="device_type_wired">Wired Headphone</string>
+    <string name="device_type_speaker">Speaker</string>
+    <string name="device_mode_headphone">Headphone</string>
+    <string name="device_mode_speaker">Speaker</string>
+    <string name="device_label_type">Type</string>
+    <string name="device_label_address">Address</string>
+    <string name="device_label_mode">Mode</string>
+    <string name="device_label_last_conn">Last Connect</string>
+    <string name="device_no_devices">No saved devices</string>
+    <string name="device_rename_title">Rename Device</string>
+    <string name="device_rename_hint">Device name</string>
+    <string name="device_action_load">Load</string>
+    <string name="device_action_update">Update</string>
+    <string name="device_action_delete">Delete</string>
 
     <!-- Actions -->
     <string name="action_save">Save</string>
