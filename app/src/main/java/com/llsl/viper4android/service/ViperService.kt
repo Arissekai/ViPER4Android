@@ -15,6 +15,7 @@ import androidx.core.util.size
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.llsl.viper4android.R
+import com.llsl.viper4android.audio.AudioDevice
 import com.llsl.viper4android.audio.AudioOutputDetector
 import com.llsl.viper4android.audio.AudioSessionMonitor
 import com.llsl.viper4android.audio.ByteArrayParam
@@ -23,14 +24,18 @@ import com.llsl.viper4android.audio.EffectDispatcher
 import com.llsl.viper4android.audio.ParamEntry
 import com.llsl.viper4android.audio.ViperEffect
 import com.llsl.viper4android.audio.ViperParams
+import com.llsl.viper4android.data.model.DeviceSettings
 import com.llsl.viper4android.data.repository.ViperRepository
 import com.llsl.viper4android.ui.screens.main.MainUiState
 import com.llsl.viper4android.ui.screens.main.MainViewModel
+import com.llsl.viper4android.ui.screens.main.deserializeEffectPrefs
+import com.llsl.viper4android.ui.screens.main.serializeEffectPrefs
 import com.llsl.viper4android.utils.FileLogger
 import com.llsl.viper4android.utils.RootShell
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -103,31 +108,86 @@ class ViperService : LifecycleService() {
         }
     }
 
+    private var currentServiceDeviceId: String = AudioDevice.ID_SPEAKER
+
     private fun startAudioOutputMonitor() {
         val detector = AudioOutputDetector(this)
         audioOutputDetector = detector
+        currentServiceDeviceId = detector.activeDevice.value.id
         lifecycleScope.launch {
-            var lastHeadphoneState = detector.isHeadphoneConnected.value
-            detector.isHeadphoneConnected.collect { headphoneConnected ->
-                if (headphoneConnected != lastHeadphoneState) {
-                    lastHeadphoneState = headphoneConnected
-                    FileLogger.i("Service", "Audio output changed: headphone=$headphoneConnected")
-                    reapplyAllEffects()
+            detector.activeDevice.collect { device ->
+                if (device.id != currentServiceDeviceId) {
+                    FileLogger.i(
+                        "Service",
+                        "Device changed: $currentServiceDeviceId -> ${device.id} (${device.name})"
+                    )
+                    saveOldDeviceToDb()
+                    currentServiceDeviceId = device.id
+                    reapplyForDevice(device)
                 }
             }
         }
     }
 
-    private fun reapplyAllEffects() {
-        lifecycleScope.launch {
-            var shmWritten = false
-            globalEffect?.let {
-                applyFullStateToEffect(it, skipShmWrite = false)
+    private suspend fun saveOldDeviceToDb() {
+        val oldId = currentServiceDeviceId
+        val existing = repository.getDeviceSettings(oldId) ?: return
+        val currentState = EffectDispatcher.loadFullStateFromPrefs(repository)
+        val isSpk = !existing.isHeadphone
+        val json = serializeEffectPrefs(currentState, isSpk)
+        repository.saveDeviceSettings(existing.copy(settingsJson = json.toString()))
+        FileLogger.i("Service", "Saved current settings to DB for $oldId")
+    }
+
+    private suspend fun reapplyForDevice(device: AudioDevice) {
+        val fxType =
+            if (device.isHeadphone) ViperParams.FX_TYPE_HEADPHONE else ViperParams.FX_TYPE_SPEAKER
+        val saved = repository.getDeviceSettings(device.id)
+        val state: MainUiState
+        if (saved != null) {
+            FileLogger.i("Service", "Loading device settings from DB for ${device.id}")
+            val baseState = EffectDispatcher.loadFullStateFromPrefs(repository)
+            val isSpk = !device.isHeadphone
+            val json = JSONObject(saved.settingsJson)
+            state = deserializeEffectPrefs(json, baseState, isSpk).copy(fxType = fxType)
+            repository.updateDeviceLastConnected(device.id)
+        } else {
+            FileLogger.i("Service", "No DB entry for ${device.id}, using DataStore defaults")
+            state = EffectDispatcher.loadFullStateFromPrefs(repository).copy(fxType = fxType)
+            val isSpk = !device.isHeadphone
+            val json = serializeEffectPrefs(state, isSpk)
+            repository.saveDeviceSettings(
+                DeviceSettings(
+                    deviceId = device.id,
+                    deviceName = device.name,
+                    isHeadphone = device.isHeadphone,
+                    settingsJson = json.toString()
+                )
+            )
+        }
+
+        val isMasterOn =
+            if (fxType == ViperParams.FX_TYPE_SPEAKER) state.spkMasterEnabled else state.masterEnabled
+        var shmWritten = false
+        globalEffect?.let {
+            it.enabled = isMasterOn
+            if (useAidlTypeUuid) {
+                dispatchFullStateViaFile(state)
                 shmWritten = true
+            } else {
+                EffectDispatcher.dispatchFullState(it, state, isMasterOn)
             }
-            for (i in 0 until sessions.size) {
-                applyFullStateToEffect(sessions.valueAt(i), skipShmWrite = shmWritten)
-                shmWritten = true
+        }
+        for (i in 0 until sessions.size) {
+            val effect = sessions.valueAt(i)
+            effect.enabled = isMasterOn
+            if (useAidlTypeUuid) {
+                if (!shmWritten) {
+                    dispatchFullStateViaFile(state)
+                    shmWritten = true
+                }
+            } else {
+                EffectDispatcher.dispatchFullState(effect, state, isMasterOn)
             }
         }
     }
