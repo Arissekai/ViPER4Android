@@ -72,3 +72,5 @@ Contributions are welcome! Please open an issue or submit a pull request if you 
 ### Localization
 
 If you want to help with localization, please follow [this guide](app/res-template/values-template/strings.xml)
+
+- RU: [@maurerdv](https://github.com/maurerdv)
