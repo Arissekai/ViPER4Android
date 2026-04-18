@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 class AudioOutputDetector(context: Context) {
 
     private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    private val _isHeadphoneConnected = MutableStateFlow(checkHeadphoneConnected(audioManager))
-    val isHeadphoneConnected: StateFlow<Boolean> = _isHeadphoneConnected.asStateFlow()
 
     private val _activeDevice = MutableStateFlow(detectActiveDevice(audioManager))
     val activeDevice: StateFlow<AudioDevice> = _activeDevice.asStateFlow()
@@ -28,7 +26,6 @@ class AudioOutputDetector(context: Context) {
                 "AudioOutput",
                 "Output device added: headphone=${if (connected) "connected" else "disconnected"} device=${device.name}"
             )
-            _isHeadphoneConnected.value = connected
             _activeDevice.value = device
         }
 
@@ -39,17 +36,15 @@ class AudioOutputDetector(context: Context) {
                 "AudioOutput",
                 "Output device removed: headphone=${if (connected) "connected" else "disconnected"} device=${device.name}"
             )
-            _isHeadphoneConnected.value = connected
             _activeDevice.value = device
         }
     }
 
     init {
-        val initial = _isHeadphoneConnected.value
         val initialDevice = _activeDevice.value
         FileLogger.i(
             "AudioOutput",
-            "Output init: headphone=${if (initial) "connected" else "disconnected"} device=${initialDevice.name}"
+            "Output init: headphone=${if (initialDevice.isHeadphone) "connected" else "disconnected"} device=${initialDevice.name}"
         )
         audioManager.registerAudioDeviceCallback(callback, Handler(Looper.getMainLooper()))
     }

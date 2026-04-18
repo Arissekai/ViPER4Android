@@ -200,7 +200,7 @@
     <string name="device_label_type">Type</string>
     <string name="device_label_address">Address</string>
     <string name="device_label_mode">Mode</string>
-    <string name="device_label_last_conn">Last Connect</string>
+    <string name="device_label_last_conn">Last Connected</string>
     <string name="device_no_devices">No saved devices</string>
     <string name="device_rename_title">Rename Device</string>
     <string name="device_rename_hint">Device name</string>

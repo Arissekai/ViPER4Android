@@ -17,13 +17,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.Speaker
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -284,12 +284,12 @@ private fun DeviceDetailView(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             ActionItem(
-                icon = Icons.Default.ArrowCircleDown,
+                icon = Icons.Default.SettingsBackupRestore,
                 label = stringResource(R.string.device_action_load),
                 onClick = onLoad
             )
             ActionItem(
-                icon = Icons.Default.ArrowCircleUp,
+                icon = Icons.Default.Sync,
                 label = stringResource(R.string.device_action_update),
                 onClick = onSave
             )
