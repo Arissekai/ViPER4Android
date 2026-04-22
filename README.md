@@ -34,6 +34,7 @@ Material Design 3 UI for ViPER4Android FX. This app provides the full feature se
 - [x] Device auto-detection (Speaker & Headphone)
 - [x] In app log debugging (tap the `Driver Version` 7 times in the `Settings`)
 - [x] Global mode and per-app mode
+- [x] Per-device profile management
 
 ## Installation
 
@@ -60,9 +61,10 @@ Material Design 3 UI for ViPER4Android FX. This app provides the full feature se
 ## Important Notes
 
 - This app may requires root access if:
-  - You are on AIDL mode and the driver is not properly installed or configured during the module installation (to create shm for AIDL driver)
-  - In in-app log debugging (to `logcat` driver's log)
-  - In Per-App Mode (to get correct session id via piid)
+  - Under AIDL mode and the driver is not properly installed or configured during the module installation (to create shm for AIDL driver)
+  - Opened in-app log debugging dialog (to `logcat` driver's log)
+  - Under Per-App Mode (to get correct session id via piid)
+  - Enabled `Convolver` or `ViPERDDC` (to copy the files to /data/local/tmp/v4a/ for the driver to read)
 - Please make sure the source of any modified APK is trustworthy to avoid any security risks
 
 ## Contributing
@@ -73,4 +75,5 @@ Contributions are welcome! Please open an issue or submit a pull request if you 
 
 If you want to help with localization, please follow [this guide](app/res-template/values-template/strings.xml)
 
-- RU: [@maurerdv](https://github.com/maurerdv)
+- RU: @[maurerdv](https://github.com/maurerdv)
+- ZH-CN: @[Arissekai](https://github.com/Arissekai)
