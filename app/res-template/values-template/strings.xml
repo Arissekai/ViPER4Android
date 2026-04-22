@@ -15,7 +15,6 @@
 -->
 <resources>
     <string name="app_name">placeholder</string>
-    <string name="notification_channel_id">placeholder</string>
     <string name="notification_channel_name">placeholder</string>
     <string name="notification_channel_description">placeholder</string>
     <string name="notification_title">placeholder</string>

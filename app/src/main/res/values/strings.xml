@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ViPER4Android</string>
-    <string name="notification_channel_id">viper4android_service</string>
     <string name="notification_channel_name">Audio Processing</string>
     <string name="notification_channel_description">Shows when ViPER4Android is processing audio</string>
     <string name="notification_title">ViPER4Android</string>
